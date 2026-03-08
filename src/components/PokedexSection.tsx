@@ -42,6 +42,7 @@ type PokemonData = {
   name: string;
   id: number;
   sprite: string;
+  shinySprite: string;
   types: string[];
   stats: { name: string; value: number }[];
   moves: { name: string; type: string; learnMethod: string }[];
