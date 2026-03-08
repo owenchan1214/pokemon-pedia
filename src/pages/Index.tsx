@@ -11,6 +11,7 @@ import MoveCalculatorSection from "@/components/MoveCalculatorSection";
 import IVCalculatorSection from "@/components/IVCalculatorSection";
 import PvPTierListSection from "@/components/PvPTierListSection";
 import TeamBuilderSection from "@/components/TeamBuilderSection";
+import ComparisonSection from "@/components/ComparisonSection";
 import LeaderboardSection from "@/components/LeaderboardSection";
 import Footer from "@/components/Footer";
 
