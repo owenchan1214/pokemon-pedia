@@ -3,9 +3,13 @@ import { Copy, Check, Gift } from "lucide-react";
 import { useState } from "react";
 
 const codes = [
-  { code: "TH4NKY0UF41RYMUCH", reward: "Very Fairy Timed Research", expires: "No expiry listed", active: true },
-  { code: "FENDIxFRGMTxPOKEMON", reward: "FENDI×FRGMT×POKÉMON avatar hoodie", expires: "No expiry listed", active: true },
-  { code: "GOTOURKALOS", reward: "GO Tour Kalos Timed Research", expires: "Expired", active: false },
+  { code: "QFWM3SRJPVRY5", reward: "Timed Research for Unown X", expires: "Active", active: true },
+  { code: "2PKXPAT2RJXKL", reward: "Timed Research for Unown Z/A", expires: "Active", active: true },
+  { code: "6K343X373BDQM", reward: "Timed Research for Unown Y", expires: "Active", active: true },
+  { code: "LRQEV2VZ59UDA", reward: "Verizon outfit (mask, jacket, backpack)", expires: "Long-lived", active: true },
+  { code: "TH4NKY0UF41RYMUCH", reward: "Very Fairy Timed Research", expires: "Expired Mar 2", active: false },
+  { code: "GOTOURKALOS", reward: "GO Tour Kalos Starter Encounters", expires: "Expired Mar 2", active: false },
+  { code: "FENDIxFRGMTxPOKEMON", reward: "FENDI×FRGMT×POKÉMON hoodie", expires: "Expired", active: false },
 ];
 
 const CodesSection = () => {
@@ -30,14 +34,14 @@ const CodesSection = () => {
           <p className="text-muted-foreground font-body">Redeem these codes in-game for free items</p>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-5xl">
           {codes.map((c, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
+              transition={{ delay: i * 0.06 }}
               className={`relative p-5 rounded-2xl border shadow-card ${
                 c.active
                   ? "bg-card-gradient border-primary/25 hover:border-primary/50"
