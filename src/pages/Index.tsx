@@ -13,6 +13,7 @@ import PvPTierListSection from "@/components/PvPTierListSection";
 import TeamBuilderSection from "@/components/TeamBuilderSection";
 import ComparisonSection from "@/components/ComparisonSection";
 import BuddyCalculatorSection from "@/components/BuddyCalculatorSection";
+import SpawnNestSection from "@/components/SpawnNestSection";
 import ChecklistSection from "@/components/ChecklistSection";
 import LeaderboardSection from "@/components/LeaderboardSection";
 import Footer from "@/components/Footer";
@@ -35,6 +36,7 @@ const Index = () => {
       <TeamBuilderSection />
       <ComparisonSection />
       <BuddyCalculatorSection />
+      <SpawnNestSection />
       <ChecklistSection />
       <LeaderboardSection />
       <Footer />
