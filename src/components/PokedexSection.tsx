@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Search, X, Loader2, Swords, Shield, Zap, Heart, Activity, Wind } from "lucide-react";
+import { Search, X, Loader2, Swords, Shield, Zap, Heart, Activity, Wind, CloudSun } from "lucide-react";
 import { useState, useCallback } from "react";
 import EvolutionChain from "./EvolutionChain";
 
