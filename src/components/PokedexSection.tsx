@@ -322,7 +322,31 @@ const PokedexSection = () => {
                   </p>
                 </div>
 
-                {/* Moves */}
+                {/* Weather Boost */}
+                {weatherBoosts.length > 0 && (
+                  <div className="p-4 rounded-2xl bg-card-gradient border border-border shadow-card">
+                    <h4 className="text-xs font-body font-semibold text-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+                      <CloudSun className="w-3.5 h-3.5 text-secondary" /> Weather Boost
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {weatherBoosts.map(wb => (
+                        <div key={wb.weather} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary/10 border border-secondary/20">
+                          <span className="text-lg">{wb.emoji}</span>
+                          <div>
+                            <p className="text-xs font-body text-foreground font-semibold">{wb.weather}</p>
+                            <p className="text-[10px] text-muted-foreground font-body capitalize">
+                              Boosts {wb.types.join(" & ")} moves
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-[11px] text-muted-foreground font-body mt-2">
+                      {pokemon?.name && `${pokemon.name} is stronger in these weather conditions`}
+                    </p>
+                  </div>
+                )}
+
                 <div className="p-4 rounded-2xl bg-card-gradient border border-border shadow-card">
                   <h4 className="text-xs font-body font-semibold text-foreground uppercase tracking-wider mb-3">Notable Moves</h4>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
