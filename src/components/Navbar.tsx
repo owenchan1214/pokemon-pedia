@@ -15,6 +15,7 @@ const links = [
   { href: "#compare", label: "Compare" },
   { href: "#buddycalc", label: "Buddy" },
   { href: "#spawns", label: "Spawns" },
+  { href: "#shinyodds", label: "Shiny" },
   { href: "#checklist", label: "Checklist" },
   { href: "#leaderboard", label: "Leaderboard" },
 ];
