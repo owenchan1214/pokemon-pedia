@@ -28,9 +28,9 @@ type TradeCategory = "standard" | "shiny_legendary" | "new_dex";
 const baseTradeCosts: Record<FriendshipLevel, Record<TradeCategory, number>> = {
   none: { standard: 100, shiny_legendary: 1000000, new_dex: 20000 },
   good: { standard: 100, shiny_legendary: 1000000, new_dex: 20000 },
-  great: { standard: 100, shiny_legendary: 16000, new_dex: 16000 },
-  ultra: { standard: 100, shiny_legendary: 1600, new_dex: 1600 },
-  best: { standard: 100, shiny_legendary: 800, new_dex: 800 },
+  great: { standard: 100, shiny_legendary: 800000, new_dex: 16000 },
+  ultra: { standard: 100, shiny_legendary: 80000, new_dex: 1600 },
+  best: { standard: 100, shiny_legendary: 40000, new_dex: 800 },
 };
 
 // Lucky trade costs (always reduced)
