@@ -11,7 +11,7 @@ const typeColorMap: Record<string, string> = {
   dark: "bg-[hsl(25,25%,32%)]", steel: "bg-[hsl(220,15%,60%)]", fairy: "bg-[hsl(330,50%,65%)]",
 };
 
-// Pokémon GO available Mega Evolutions (as of 2026)
+// Pokémon GO available Mega/Primal Evolutions (as of 2026)
 const goMegaAvailable = new Set([
   "venusaur", "charizard", "blastoise", "beedrill", "pidgeot",
   "alakazam", "slowbro", "gengar", "kangaskhan", "pinsir",
@@ -21,14 +21,15 @@ const goMegaAvailable = new Set([
   "medicham", "manectric", "sharpedo", "camerupt", "altaria",
   "banette", "absol", "glalie", "salamence", "metagross",
   "latias", "latios", "rayquaza", "lopunny", "garchomp",
-  "lucario", "abomasnow", "gallade", "diancie", "groudon", "kyogre",
+  "lucario", "abomasnow", "gallade", "audino", "diancie",
+  "groudon", "kyogre", "dragonite",
 ]);
 
 // Pokémon GO available Gigantamax forms (Dynamax feature added 2024-2025)
 const goGmaxAvailable = new Set([
   "charizard", "blastoise", "venusaur", "pikachu", "eevee",
   "snorlax", "gengar", "machamp", "lapras", "kingler",
-  "toxtricity", "alcremie", "duraludon", "urshifu",
+  "meowth", "toxtricity", "alcremie", "duraludon", "urshifu",
   "rillaboom", "cinderace", "inteleon",
 ]);
 
