@@ -291,6 +291,9 @@ const PokedexSection = () => {
                     ))}
                   </div>
                 </div>
+
+                {/* Evolution Chain */}
+                <EvolutionChain pokemonId={pokemon.id} pokemonName={pokemon.name} />
               </div>
             </motion.div>
           )}
