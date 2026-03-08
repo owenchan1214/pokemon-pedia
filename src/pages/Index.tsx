@@ -38,6 +38,7 @@ const Index = () => {
       <ComparisonSection />
       <BuddyCalculatorSection />
       <SpawnNestSection />
+      <ShinyOddsCalculator />
       <ChecklistSection />
       <LeaderboardSection />
       <Footer />
