@@ -6,59 +6,59 @@
 
 @layer base {
   :root {
-    --background: 225 25% 8%;
-    --foreground: 210 40% 96%;
+    --background: 90 15% 96%;
+    --foreground: 150 20% 15%;
 
-    --card: 225 20% 12%;
-    --card-foreground: 210 40% 96%;
+    --card: 80 20% 92%;
+    --card-foreground: 150 20% 15%;
 
-    --popover: 225 20% 12%;
-    --popover-foreground: 210 40% 96%;
+    --popover: 80 20% 92%;
+    --popover-foreground: 150 20% 15%;
 
-    --primary: 45 100% 55%;
-    --primary-foreground: 225 25% 8%;
+    --primary: 145 55% 38%;
+    --primary-foreground: 80 20% 98%;
 
-    --secondary: 200 80% 50%;
-    --secondary-foreground: 210 40% 96%;
+    --secondary: 195 60% 42%;
+    --secondary-foreground: 80 20% 98%;
 
-    --muted: 225 15% 18%;
-    --muted-foreground: 215 15% 55%;
+    --muted: 90 10% 88%;
+    --muted-foreground: 140 10% 45%;
 
-    --accent: 340 85% 55%;
-    --accent-foreground: 210 40% 96%;
+    --accent: 28 75% 52%;
+    --accent-foreground: 80 20% 98%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 65% 50%;
+    --destructive-foreground: 80 20% 98%;
 
-    --border: 225 15% 20%;
-    --input: 225 15% 20%;
-    --ring: 45 100% 55%;
+    --border: 90 12% 82%;
+    --input: 90 12% 82%;
+    --ring: 145 55% 38%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    --team-mystic: 210 90% 55%;
-    --team-valor: 0 85% 55%;
-    --team-instinct: 45 100% 55%;
-    --legendary: 270 80% 60%;
-    --mega: 310 85% 55%;
-    --shadow: 260 60% 40%;
-    --shiny: 45 100% 65%;
+    --team-mystic: 210 60% 50%;
+    --team-valor: 0 65% 50%;
+    --team-instinct: 45 80% 50%;
+    --legendary: 270 50% 55%;
+    --mega: 310 55% 50%;
+    --shadow: 260 40% 40%;
+    --shiny: 42 85% 55%;
 
-    --gradient-hero: linear-gradient(135deg, hsl(225 25% 8%) 0%, hsl(240 30% 15%) 50%, hsl(225 25% 8%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(225 20% 14%) 0%, hsl(225 20% 10%) 100%);
-    --gradient-gold: linear-gradient(135deg, hsl(40 100% 50%) 0%, hsl(50 100% 65%) 50%, hsl(40 100% 50%) 100%);
-    --gradient-legendary: linear-gradient(135deg, hsl(270 80% 60%) 0%, hsl(290 70% 50%) 100%);
-    --shadow-glow: 0 0 30px hsl(45 100% 55% / 0.15);
-    --shadow-card: 0 8px 32px hsl(225 25% 4% / 0.5);
+    --gradient-hero: linear-gradient(160deg, hsl(120 20% 92%) 0%, hsl(160 25% 88%) 40%, hsl(90 20% 94%) 100%);
+    --gradient-card: linear-gradient(155deg, hsl(80 18% 95%) 0%, hsl(100 15% 90%) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(145 55% 32%) 0%, hsl(160 50% 45%) 50%, hsl(145 55% 32%) 100%);
+    --gradient-legendary: linear-gradient(135deg, hsl(270 50% 55%) 0%, hsl(290 45% 50%) 100%);
+    --shadow-glow: 0 0 30px hsl(145 55% 38% / 0.12);
+    --shadow-card: 0 4px 20px hsl(150 15% 50% / 0.08);
 
-    --sidebar-background: 225 20% 10%;
-    --sidebar-foreground: 210 40% 96%;
-    --sidebar-primary: 45 100% 55%;
-    --sidebar-primary-foreground: 225 25% 8%;
-    --sidebar-accent: 225 15% 18%;
-    --sidebar-accent-foreground: 210 40% 96%;
-    --sidebar-border: 225 15% 20%;
-    --sidebar-ring: 45 100% 55%;
+    --sidebar-background: 90 15% 93%;
+    --sidebar-foreground: 150 20% 15%;
+    --sidebar-primary: 145 55% 38%;
+    --sidebar-primary-foreground: 80 20% 98%;
+    --sidebar-accent: 90 10% 88%;
+    --sidebar-accent-foreground: 150 20% 15%;
+    --sidebar-border: 90 12% 82%;
+    --sidebar-ring: 145 55% 38%;
   }
 }
 

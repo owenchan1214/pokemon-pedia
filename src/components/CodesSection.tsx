@@ -18,7 +18,7 @@ const CodesSection = () => {
   };
 
   return (
-    <section id="codes" className="py-20 bg-muted/30">
+    <section id="codes" className="py-20 bg-card/40">
       <div className="container px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -38,22 +38,22 @@ const CodesSection = () => {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              className={`relative p-5 rounded-xl border shadow-card ${
+              className={`relative p-5 rounded-2xl border shadow-card ${
                 c.active
-                  ? "bg-card-gradient border-primary/30 hover:border-primary/60"
-                  : "bg-card/50 border-border opacity-60"
+                  ? "bg-card-gradient border-primary/25 hover:border-primary/50"
+                  : "bg-muted/40 border-border opacity-60"
               } transition-colors`}
             >
               <Gift className={`w-5 h-5 mb-3 ${c.active ? "text-primary" : "text-muted-foreground"}`} />
               <p className="font-body font-semibold text-foreground mb-1 text-sm">{c.reward}</p>
               <div className="flex items-center gap-2 mt-3">
-                <code className="flex-1 text-xs font-mono bg-muted/50 px-3 py-2 rounded border border-border truncate">
+                <code className="flex-1 text-xs font-mono bg-muted/60 px-3 py-2 rounded-lg border border-border truncate">
                   {c.code}
                 </code>
                 {c.active && (
                   <button
                     onClick={() => handleCopy(c.code, i)}
-                    className="p-2 rounded-md bg-muted hover:bg-primary/20 transition-colors"
+                    className="p-2 rounded-lg bg-muted hover:bg-primary/15 transition-colors"
                   >
                     {copiedIndex === i ? (
                       <Check className="w-4 h-4 text-primary" />
@@ -67,7 +67,7 @@ const CodesSection = () => {
                 {c.expires}
               </p>
               {!c.active && (
-                <div className="absolute top-3 right-3 px-2 py-0.5 rounded text-[10px] font-body font-bold bg-destructive/20 text-destructive">
+                <div className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-[10px] font-body font-bold bg-destructive/15 text-destructive">
                   EXPIRED
                 </div>
               )}
