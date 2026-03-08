@@ -15,6 +15,7 @@ import ComparisonSection from "@/components/ComparisonSection";
 import BuddyCalculatorSection from "@/components/BuddyCalculatorSection";
 import SpawnNestSection from "@/components/SpawnNestSection";
 import ShinyOddsCalculator from "@/components/ShinyOddsCalculator";
+import LuckyTradeSection from "@/components/LuckyTradeSection";
 import ChecklistSection from "@/components/ChecklistSection";
 import LeaderboardSection from "@/components/LeaderboardSection";
 import Footer from "@/components/Footer";
@@ -39,6 +40,7 @@ const Index = () => {
       <BuddyCalculatorSection />
       <SpawnNestSection />
       <ShinyOddsCalculator />
+      <LuckyTradeSection />
       <ChecklistSection />
       <LeaderboardSection />
       <Footer />
