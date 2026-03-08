@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Menu, X, Sun, Moon } from "lucide-react";
 
 const links = [
   { href: "#events", label: "Events" },
@@ -10,6 +10,22 @@ const links = [
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
+  const [dark, setDark] = useState(() => {
+    if (typeof window !== "undefined") {
+      return document.documentElement.classList.contains("dark");
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", dark);
+    localStorage.setItem("theme", dark ? "dark" : "light");
+  }, [dark]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("theme");
+    if (saved === "dark") setDark(true);
+  }, []);
 
   return (
     <nav className="sticky top-0 z-50 bg-background/85 backdrop-blur-xl border-b border-border">
@@ -23,10 +39,18 @@ const Navbar = () => {
               {l.label}
             </a>
           ))}
+          <button onClick={() => setDark(!dark)} className="p-2 rounded-full hover:bg-muted transition-colors">
+            {dark ? <Sun className="w-4 h-4 text-shiny" /> : <Moon className="w-4 h-4 text-muted-foreground" />}
+          </button>
         </div>
-        <button className="md:hidden p-2" onClick={() => setOpen(!open)}>
-          {open ? <X className="w-5 h-5 text-foreground" /> : <Menu className="w-5 h-5 text-foreground" />}
-        </button>
+        <div className="flex items-center gap-1 md:hidden">
+          <button onClick={() => setDark(!dark)} className="p-2 rounded-full hover:bg-muted transition-colors">
+            {dark ? <Sun className="w-4 h-4 text-shiny" /> : <Moon className="w-4 h-4 text-muted-foreground" />}
+          </button>
+          <button className="p-2" onClick={() => setOpen(!open)}>
+            {open ? <X className="w-5 h-5 text-foreground" /> : <Menu className="w-5 h-5 text-foreground" />}
+          </button>
+        </div>
       </div>
       {open && (
         <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-xl">
