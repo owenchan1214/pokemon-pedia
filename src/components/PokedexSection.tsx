@@ -188,6 +188,7 @@ const PokedexSection = () => {
   };
 
   const counterTypes = pokemon ? getCounterTypes(pokemon.types) : [];
+  const weatherBoosts = pokemon ? getWeatherBoosts(pokemon.types) : [];
 
   return (
     <section id="pokedex" className="py-20 bg-card/30">
