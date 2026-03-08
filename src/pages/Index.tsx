@@ -5,6 +5,7 @@ import CommunityDayWidget from "@/components/CommunityDayWidget";
 import CodesSection from "@/components/CodesSection";
 import RaidsSection from "@/components/RaidsSection";
 import TypeChartSection from "@/components/TypeChartSection";
+import PokedexSection from "@/components/PokedexSection";
 import PvPTierListSection from "@/components/PvPTierListSection";
 import TeamBuilderSection from "@/components/TeamBuilderSection";
 import LeaderboardSection from "@/components/LeaderboardSection";
@@ -20,6 +21,7 @@ const Index = () => {
       <CodesSection />
       <RaidsSection />
       <TypeChartSection />
+      <PokedexSection />
       <PvPTierListSection />
       <TeamBuilderSection />
       <LeaderboardSection />
