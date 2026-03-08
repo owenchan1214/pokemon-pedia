@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Search, X, Loader2, Swords, Shield, Zap, Heart, Activity, Wind } from "lucide-react";
 import { useState, useCallback } from "react";
+import EvolutionChain from "./EvolutionChain";
 
 const typeColorMap: Record<string, string> = {
   normal: "bg-[hsl(60,10%,55%)]", fire: "bg-[hsl(15,80%,50%)]", water: "bg-[hsl(220,70%,55%)]",
@@ -290,6 +291,9 @@ const PokedexSection = () => {
                     ))}
                   </div>
                 </div>
+
+                {/* Evolution Chain */}
+                <EvolutionChain pokemonId={pokemon.id} pokemonName={pokemon.name} />
               </div>
             </motion.div>
           )}

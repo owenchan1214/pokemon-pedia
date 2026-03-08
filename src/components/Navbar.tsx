@@ -7,6 +7,7 @@ const links = [
   { href: "#raids", label: "Raids" },
   { href: "#typechart", label: "Types" },
   { href: "#pokedex", label: "Pokédex" },
+  { href: "#raidcounter", label: "Counters" },
   { href: "#pvp", label: "PvP" },
   { href: "#teambuilder", label: "Team" },
   { href: "#leaderboard", label: "Leaderboard" },
