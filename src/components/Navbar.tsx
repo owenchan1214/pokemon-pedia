@@ -14,6 +14,7 @@ const links = [
   { href: "#teambuilder", label: "Team" },
   { href: "#compare", label: "Compare" },
   { href: "#buddycalc", label: "Buddy" },
+  { href: "#spawns", label: "Spawns" },
   { href: "#checklist", label: "Checklist" },
   { href: "#leaderboard", label: "Leaderboard" },
 ];
