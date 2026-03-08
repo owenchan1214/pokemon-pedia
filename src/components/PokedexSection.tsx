@@ -124,12 +124,14 @@ const PokedexSection = () => {
         name: data.name,
         id: data.id,
         sprite: data.sprites?.other?.["official-artwork"]?.front_default || data.sprites?.front_default || "",
+        shinySprite: data.sprites?.other?.["official-artwork"]?.front_shiny || data.sprites?.front_shiny || "",
         types: data.types.map((t: any) => t.type.name),
         stats: data.stats.map((s: any) => ({ name: s.stat.name, value: s.base_stat })),
         moves: moveDetails,
         height: data.height / 10,
         weight: data.weight / 10,
       });
+      setShowShiny(false);
     } catch {
       setError("Pokémon not found. Try a name (e.g. pikachu) or Pokédex number.");
     } finally {
