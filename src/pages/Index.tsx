@@ -5,6 +5,7 @@ import CodesSection from "@/components/CodesSection";
 import RaidsSection from "@/components/RaidsSection";
 import TypeChartSection from "@/components/TypeChartSection";
 import PvPTierListSection from "@/components/PvPTierListSection";
+import TeamBuilderSection from "@/components/TeamBuilderSection";
 import LeaderboardSection from "@/components/LeaderboardSection";
 import Footer from "@/components/Footer";
 
