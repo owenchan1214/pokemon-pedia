@@ -13,6 +13,7 @@ const links = [
   { href: "#pvp", label: "PvP" },
   { href: "#teambuilder", label: "Team" },
   { href: "#compare", label: "Compare" },
+  { href: "#buddycalc", label: "Buddy" },
   { href: "#checklist", label: "Checklist" },
   { href: "#leaderboard", label: "Leaderboard" },
 ];
