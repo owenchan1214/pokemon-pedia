@@ -39,9 +39,9 @@ const RaidTable = ({ title, icon: Icon, raids, color }: { title: string; icon: a
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
-    className="bg-card-gradient rounded-xl border border-border shadow-card overflow-hidden"
+    className="bg-card-gradient rounded-2xl border border-border shadow-card overflow-hidden"
   >
-    <div className={`flex items-center gap-3 p-4 border-b border-border`}>
+    <div className="flex items-center gap-3 p-4 border-b border-border">
       <Icon className={`w-5 h-5 ${color}`} />
       <h3 className="font-display text-lg text-foreground">{title}</h3>
     </div>
@@ -57,7 +57,7 @@ const RaidTable = ({ title, icon: Icon, raids, color }: { title: string; icon: a
         </thead>
         <tbody>
           {raids.map((r, i) => (
-            <tr key={i} className="border-t border-border/50 hover:bg-muted/20 transition-colors">
+            <tr key={i} className="border-t border-border/50 hover:bg-primary/5 transition-colors">
               <td className="p-3 font-semibold text-foreground whitespace-nowrap">
                 {r.pokemon} {r.shiny && <span className="text-shiny text-xs">✦</span>}
               </td>

@@ -12,14 +12,14 @@ const Navbar = () => {
   const [open, setOpen] = useState(false);
 
   return (
-    <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
+    <nav className="sticky top-0 z-50 bg-background/85 backdrop-blur-xl border-b border-border">
       <div className="container px-4 flex items-center justify-between h-14">
         <a href="#" className="font-display text-lg text-gradient-gold">
           PGO HUB
         </a>
         <div className="hidden md:flex items-center gap-6">
           {links.map((l) => (
-            <a key={l.href} href={l.href} className="text-sm font-body text-muted-foreground hover:text-foreground transition-colors">
+            <a key={l.href} href={l.href} className="text-sm font-body text-muted-foreground hover:text-primary transition-colors">
               {l.label}
             </a>
           ))}
@@ -35,7 +35,7 @@ const Navbar = () => {
               key={l.href}
               href={l.href}
               onClick={() => setOpen(false)}
-              className="block px-6 py-3 text-sm font-body text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors"
+              className="block px-6 py-3 text-sm font-body text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors"
             >
               {l.label}
             </a>

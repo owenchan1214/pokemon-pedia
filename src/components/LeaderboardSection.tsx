@@ -71,7 +71,7 @@ const LeaderboardSection = () => {
   const displayed = showAll ? topPokemon : topPokemon.slice(0, 20);
 
   return (
-    <section id="leaderboard" className="py-20 bg-muted/30">
+    <section id="leaderboard" className="py-20 bg-card/40">
       <div className="container px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -83,7 +83,7 @@ const LeaderboardSection = () => {
           <p className="text-muted-foreground font-body">Ranked by max DPS from best moveset · Data from GameInfo</p>
         </motion.div>
 
-        <div className="bg-card-gradient rounded-xl border border-border shadow-card overflow-hidden max-w-5xl">
+        <div className="bg-card-gradient rounded-2xl border border-border shadow-card overflow-hidden max-w-5xl">
           <div className="overflow-x-auto">
             <table className="w-full text-sm font-body">
               <thead>
@@ -103,7 +103,7 @@ const LeaderboardSection = () => {
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.02 }}
-                    className="border-t border-border/30 hover:bg-muted/20 transition-colors"
+                    className="border-t border-border/30 hover:bg-primary/5 transition-colors"
                   >
                     <td className="p-3 text-center">
                       {p.rank <= 3 ? (
