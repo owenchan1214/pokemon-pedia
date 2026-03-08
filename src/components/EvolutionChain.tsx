@@ -24,6 +24,14 @@ const goMegaAvailable = new Set([
   "lucario", "abomasnow", "gallade", "diancie", "groudon", "kyogre",
 ]);
 
+// Pokémon GO available Gigantamax forms (Dynamax feature added 2024-2025)
+const goGmaxAvailable = new Set([
+  "charizard", "blastoise", "venusaur", "pikachu", "eevee",
+  "snorlax", "gengar", "machamp", "lapras", "kingler",
+  "toxtricity", "alcremie", "duraludon", "urshifu",
+  "rillaboom", "cinderace", "inteleon",
+]);
+
 type EvoStage = {
   name: string;
   id: number;
@@ -92,8 +100,8 @@ async function fetchEvolutionChain(pokemonId: number): Promise<EvolutionChainDat
         if (formName.includes("mega")) category = "mega";
         if (formName.includes("gmax")) category = "gmax";
 
-        // Filter: Only show Mega if available in Pokémon GO, never show Gigantamax (not in GO)
-        if (category === "gmax") return null;
+        // Filter: Only show forms available in Pokémon GO
+        if (category === "gmax" && !goGmaxAvailable.has(baseName)) return null;
         if (category === "mega" && !goMegaAvailable.has(baseName)) return null;
 
         return {
