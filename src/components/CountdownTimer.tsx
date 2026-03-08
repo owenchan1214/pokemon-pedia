@@ -3,9 +3,10 @@ import { useState, useEffect } from "react";
 interface CountdownTimerProps {
   targetDate: Date;
   label: string;
+  inline?: boolean;
 }
 
-const CountdownTimer = ({ targetDate, label }: CountdownTimerProps) => {
+const CountdownTimer = ({ targetDate, label, inline = false }: CountdownTimerProps) => {
   const [timeLeft, setTimeLeft] = useState(getTimeLeft(targetDate));
 
   useEffect(() => {
@@ -14,6 +15,18 @@ const CountdownTimer = ({ targetDate, label }: CountdownTimerProps) => {
     }, 1000);
     return () => clearInterval(timer);
   }, [targetDate]);
+
+  if (inline) {
+    if (timeLeft.total <= 0) {
+      return <span className="text-xs font-body font-semibold text-primary">🎉 Now!</span>;
+    }
+    return (
+      <span className="text-xs font-mono text-muted-foreground tabular-nums">
+        {timeLeft.days > 0 && `${timeLeft.days}d `}
+        {String(timeLeft.hours).padStart(2, "0")}:{String(timeLeft.minutes).padStart(2, "0")}:{String(timeLeft.seconds).padStart(2, "0")}
+      </span>
+    );
+  }
 
   if (timeLeft.total <= 0) {
     return (
