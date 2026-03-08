@@ -76,6 +76,7 @@ const PokedexSection = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [searched, setSearched] = useState(false);
+  const [showShiny, setShowShiny] = useState(false);
 
   const searchPokemon = useCallback(async (name: string) => {
     const trimmed = name.trim().toLowerCase();
