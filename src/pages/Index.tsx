@@ -19,6 +19,7 @@ const Index = () => {
       <RaidsSection />
       <TypeChartSection />
       <PvPTierListSection />
+      <TeamBuilderSection />
       <LeaderboardSection />
       <Footer />
     </div>
