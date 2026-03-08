@@ -12,6 +12,7 @@ const links = [
   { href: "#ivcalc", label: "IV Calc" },
   { href: "#pvp", label: "PvP" },
   { href: "#teambuilder", label: "Team" },
+  { href: "#compare", label: "Compare" },
   { href: "#leaderboard", label: "Leaderboard" },
 ];
 
