@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Users, Plus, X, Shield, Swords, ChevronDown } from "lucide-react";
+import { Users, Plus, X, Shield, Swords, ChevronDown, Crown, Trophy } from "lucide-react";
 import { useState, useMemo } from "react";
 
 const allTypes = [
@@ -18,45 +18,87 @@ const typeColorMap: Record<string, string> = {
   Dark: "bg-[hsl(25,25%,32%)]", Steel: "bg-[hsl(220,15%,60%)]", Fairy: "bg-[hsl(330,50%,65%)]",
 };
 
-type PokemonOption = { name: string; types: PType[] };
+type PokemonOption = { name: string; types: PType[]; role?: string };
 
-const pokemonPool: PokemonOption[] = [
-  { name: "Zacian (Crowned Sword)", types: ["Fairy", "Steel"] },
-  { name: "Calyrex (Shadow Rider)", types: ["Psychic", "Ghost"] },
-  { name: "Deoxys (Attack)", types: ["Psychic"] },
-  { name: "Thundurus (Therian)", types: ["Electric", "Flying"] },
-  { name: "Blacephalon", types: ["Fire", "Ghost"] },
-  { name: "Mewtwo", types: ["Psychic"] },
-  { name: "Lucario", types: ["Fighting", "Steel"] },
-  { name: "Hoopa (Unbound)", types: ["Psychic", "Dark"] },
-  { name: "Kyurem (Black)", types: ["Dragon", "Ice"] },
-  { name: "Salamence", types: ["Dragon", "Flying"] },
-  { name: "Kartana", types: ["Grass", "Steel"] },
-  { name: "Reshiram", types: ["Dragon", "Fire"] },
-  { name: "Palkia (Origin)", types: ["Water", "Dragon"] },
-  { name: "Rayquaza", types: ["Dragon", "Flying"] },
-  { name: "Kyogre", types: ["Water"] },
-  { name: "Groudon", types: ["Ground"] },
-  { name: "Darkrai", types: ["Dark"] },
-  { name: "Gengar", types: ["Ghost", "Poison"] },
-  { name: "Metagross", types: ["Steel", "Psychic"] },
-  { name: "Dragonite", types: ["Dragon", "Flying"] },
-  { name: "Dialga", types: ["Steel", "Dragon"] },
-  { name: "Zekrom", types: ["Dragon", "Electric"] },
-  { name: "Chandelure", types: ["Ghost", "Fire"] },
-  { name: "Garchomp", types: ["Dragon", "Ground"] },
-  { name: "Tyranitar", types: ["Rock", "Dark"] },
-  { name: "Machamp", types: ["Fighting"] },
-  { name: "Togekiss", types: ["Fairy", "Flying"] },
-  { name: "Swampert", types: ["Water", "Ground"] },
-  { name: "Venusaur", types: ["Grass", "Poison"] },
-  { name: "Charizard", types: ["Fire", "Flying"] },
-  { name: "Blastoise", types: ["Water"] },
-  { name: "Gyarados", types: ["Water", "Flying"] },
-  { name: "Rhyperior", types: ["Ground", "Rock"] },
-  { name: "Excadrill", types: ["Ground", "Steel"] },
-  { name: "Mamoswine", types: ["Ice", "Ground"] },
-  { name: "Volcarona", types: ["Bug", "Fire"] },
+const greatLeaguePool: PokemonOption[] = [
+  { name: "Jellicent", types: ["Water", "Ghost"], role: "Safe Switch" },
+  { name: "Altaria", types: ["Dragon", "Flying"], role: "Closer" },
+  { name: "Azumarill", types: ["Water", "Fairy"], role: "Lead" },
+  { name: "Furret", types: ["Normal"], role: "Safe Switch" },
+  { name: "Empoleon", types: ["Water", "Steel"], role: "Closer" },
+  { name: "Wigglytuff", types: ["Normal", "Fairy"], role: "Lead" },
+  { name: "Corviknight", types: ["Flying", "Steel"], role: "Safe Switch" },
+  { name: "Lickilicky", types: ["Normal"], role: "Closer" },
+  { name: "Swampert", types: ["Water", "Ground"], role: "Lead" },
+  { name: "Venusaur", types: ["Grass", "Poison"], role: "Closer" },
+  { name: "Bastiodon", types: ["Rock", "Steel"], role: "Lead" },
+  { name: "Trevenant", types: ["Ghost", "Grass"], role: "Safe Switch" },
+  { name: "Galarian Stunfisk", types: ["Ground", "Steel"], role: "Lead" },
+  { name: "Medicham", types: ["Fighting", "Psychic"], role: "Lead" },
+  { name: "Registeel", types: ["Steel"], role: "Closer" },
+  { name: "Skarmory", types: ["Steel", "Flying"], role: "Lead" },
+  { name: "Lickitung", types: ["Normal"], role: "Safe Switch" },
+  { name: "Sableye", types: ["Dark", "Ghost"], role: "Lead" },
+  { name: "Umbreon", types: ["Dark"], role: "Safe Switch" },
+  { name: "Toxapex", types: ["Poison", "Water"], role: "Closer" },
+  { name: "Mandibuzz", types: ["Dark", "Flying"], role: "Safe Switch" },
+  { name: "Nidoqueen", types: ["Poison", "Ground"], role: "Closer" },
+  { name: "Pelipper", types: ["Water", "Flying"], role: "Lead" },
+  { name: "Lanturn", types: ["Water", "Electric"], role: "Safe Switch" },
+];
+
+const ultraLeaguePool: PokemonOption[] = [
+  { name: "Galarian Moltres", types: ["Dark", "Flying"], role: "Lead" },
+  { name: "Corviknight", types: ["Flying", "Steel"], role: "Safe Switch" },
+  { name: "Lapras", types: ["Water", "Ice"], role: "Lead" },
+  { name: "Jellicent", types: ["Water", "Ghost"], role: "Safe Switch" },
+  { name: "Florges", types: ["Fairy"], role: "Closer" },
+  { name: "Empoleon", types: ["Water", "Steel"], role: "Closer" },
+  { name: "Clefable", types: ["Fairy"], role: "Closer" },
+  { name: "Giratina (Altered)", types: ["Ghost", "Dragon"], role: "Lead" },
+  { name: "Cresselia", types: ["Psychic"], role: "Safe Switch" },
+  { name: "Cobalion", types: ["Steel", "Fighting"], role: "Lead" },
+  { name: "Swampert", types: ["Water", "Ground"], role: "Lead" },
+  { name: "Talonflame", types: ["Fire", "Flying"], role: "Lead" },
+  { name: "Walrein", types: ["Ice", "Water"], role: "Closer" },
+  { name: "Registeel", types: ["Steel"], role: "Closer" },
+  { name: "Venusaur", types: ["Grass", "Poison"], role: "Closer" },
+  { name: "Mandibuzz", types: ["Dark", "Flying"], role: "Safe Switch" },
+  { name: "Charizard", types: ["Fire", "Flying"], role: "Closer" },
+  { name: "Gyarados", types: ["Water", "Flying"], role: "Lead" },
+  { name: "Toxicroak", types: ["Poison", "Fighting"], role: "Closer" },
+  { name: "Umbreon", types: ["Dark"], role: "Safe Switch" },
+];
+
+const masterLeaguePool: PokemonOption[] = [
+  { name: "Zacian (Crowned)", types: ["Fairy", "Steel"], role: "Lead" },
+  { name: "Palkia (Origin)", types: ["Water", "Dragon"], role: "Closer" },
+  { name: "Metagross", types: ["Steel", "Psychic"], role: "Safe Switch" },
+  { name: "Xerneas", types: ["Fairy"], role: "Lead" },
+  { name: "Dialga (Origin)", types: ["Steel", "Dragon"], role: "Lead" },
+  { name: "Reshiram", types: ["Dragon", "Fire"], role: "Closer" },
+  { name: "Kyurem (White)", types: ["Dragon", "Ice"], role: "Closer" },
+  { name: "Lunala", types: ["Psychic", "Ghost"], role: "Safe Switch" },
+  { name: "Kyurem (Black)", types: ["Dragon", "Ice"], role: "Closer" },
+  { name: "Kyogre", types: ["Water"], role: "Lead" },
+  { name: "Groudon", types: ["Ground"], role: "Lead" },
+  { name: "Rayquaza", types: ["Dragon", "Flying"], role: "Closer" },
+  { name: "Mewtwo", types: ["Psychic"], role: "Safe Switch" },
+  { name: "Giratina (Origin)", types: ["Ghost", "Dragon"], role: "Safe Switch" },
+  { name: "Darkrai", types: ["Dark"], role: "Closer" },
+  { name: "Dragonite", types: ["Dragon", "Flying"], role: "Safe Switch" },
+  { name: "Garchomp", types: ["Dragon", "Ground"], role: "Closer" },
+  { name: "Tyranitar", types: ["Rock", "Dark"], role: "Closer" },
+  { name: "Togekiss", types: ["Fairy", "Flying"], role: "Lead" },
+  { name: "Excadrill", types: ["Ground", "Steel"], role: "Closer" },
+  { name: "Zamazenta (Crowned)", types: ["Fighting", "Steel"], role: "Lead" },
+  { name: "Zekrom", types: ["Dragon", "Electric"], role: "Closer" },
+];
+
+const leagueConfig = [
+  { id: "great", name: "Great League", cap: "1,500 CP", icon: Shield, pool: greatLeaguePool, color: "text-secondary" },
+  { id: "ultra", name: "Ultra League", cap: "2,500 CP", icon: Swords, pool: ultraLeaguePool, color: "text-[hsl(var(--legendary))]" },
+  { id: "master", name: "Master League", cap: "No Limit", icon: Crown, pool: masterLeaguePool, color: "text-accent" },
 ];
 
 // Type effectiveness chart
@@ -81,16 +123,45 @@ const effectiveness: Record<PType, { superEffective: PType[]; notVeryEffective: 
   Fairy:    { superEffective: ["Fighting", "Dragon", "Dark"], notVeryEffective: ["Fire", "Poison", "Steel"], immune: [] },
 };
 
+// Defensive type chart: what types resist what
+const defensiveResistances: Record<PType, PType[]> = {
+  Normal: [], Fire: ["Fire", "Grass", "Ice", "Bug", "Steel", "Fairy"],
+  Water: ["Fire", "Water", "Ice", "Steel"], Electric: ["Electric", "Flying", "Steel"],
+  Grass: ["Water", "Electric", "Grass", "Ground"], Ice: ["Ice"],
+  Fighting: ["Bug", "Rock", "Dark"], Poison: ["Grass", "Fighting", "Poison", "Bug", "Fairy"],
+  Ground: ["Poison", "Rock"], Flying: ["Grass", "Fighting", "Bug"],
+  Psychic: ["Fighting", "Psychic"], Bug: ["Grass", "Fighting", "Ground"],
+  Rock: ["Normal", "Fire", "Poison", "Flying"], Ghost: ["Poison", "Bug"],
+  Dragon: ["Fire", "Water", "Electric", "Grass"], Dark: ["Ghost", "Dark"],
+  Steel: ["Normal", "Grass", "Ice", "Flying", "Psychic", "Bug", "Rock", "Dragon", "Steel", "Fairy"],
+  Fairy: ["Fighting", "Bug", "Dark"],
+};
+
+const defensiveImmunities: Record<PType, PType[]> = {
+  Normal: ["Ghost"], Fire: [], Water: [], Electric: [], Grass: [], Ice: [],
+  Fighting: [], Poison: [], Ground: ["Electric"], Flying: ["Ground"],
+  Psychic: [], Bug: [], Rock: [], Ghost: ["Normal", "Fighting"],
+  Dragon: [], Dark: ["Psychic"], Steel: ["Poison"], Fairy: ["Dragon"],
+};
+
 const TypeBadge = ({ type }: { type: string }) => (
   <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] text-white font-semibold mr-1 ${typeColorMap[type] || "bg-muted"}`}>
     {type}
   </span>
 );
 
+const RoleBadge = ({ role }: { role: string }) => {
+  const colors = role === "Lead" ? "bg-primary/15 text-primary" : role === "Closer" ? "bg-accent/15 text-accent" : "bg-secondary/15 text-secondary";
+  return <span className={`text-[9px] font-body font-semibold px-1.5 py-0.5 rounded ${colors}`}>{role}</span>;
+};
+
 const TeamBuilderSection = () => {
+  const [league, setLeague] = useState("great");
   const [team, setTeam] = useState<PokemonOption[]>([]);
   const [searchOpen, setSearchOpen] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const currentLeague = leagueConfig.find(l => l.id === league)!;
 
   const addToTeam = (pokemon: PokemonOption, slot: number) => {
     const newTeam = [...team];
@@ -108,15 +179,22 @@ const TeamBuilderSection = () => {
     setTeam(team.filter((_, i) => i !== index));
   };
 
+  const switchLeague = (newLeague: string) => {
+    setLeague(newLeague);
+    setTeam([]);
+    setSearchOpen(null);
+    setSearchQuery("");
+  };
+
   const filteredPool = useMemo(() => {
     const selected = new Set(team.map(p => p.name));
-    let list = pokemonPool.filter(p => !selected.has(p.name));
+    let list = currentLeague.pool.filter(p => !selected.has(p.name));
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       list = list.filter(p => p.name.toLowerCase().includes(q));
     }
     return list;
-  }, [searchQuery, team]);
+  }, [searchQuery, team, currentLeague.pool]);
 
   // Coverage analysis
   const coverage = useMemo(() => {
@@ -136,33 +214,47 @@ const TeamBuilderSection = () => {
       });
     });
 
-    // Defensive weaknesses
+    // Defensive analysis
     const weakTo = new Map<PType, number>();
-    const resistsMap = new Map<PType, number>();
+    const resistsCount = new Map<PType, number>();
 
     team.forEach(pokemon => {
       allTypes.forEach(attackType => {
-        const eff = effectiveness[attackType];
+        let mult = 1;
         pokemon.types.forEach(defType => {
-          if (eff.superEffective.includes(defType)) {
-            weakTo.set(attackType, (weakTo.get(attackType) || 0) + 1);
-          }
-          if (eff.notVeryEffective.includes(defType) || eff.immune.includes(defType)) {
-            resistsMap.set(attackType, (resistsMap.get(attackType) || 0) + 1);
-          }
+          if (effectiveness[attackType].superEffective.includes(defType)) mult *= 2;
+          if (defensiveResistances[defType]?.includes(attackType)) mult *= 0.5;
+          if (defensiveImmunities[defType]?.includes(attackType)) mult *= 0;
         });
+        if (mult >= 2) weakTo.set(attackType, (weakTo.get(attackType) || 0) + 1);
+        if (mult < 1) resistsCount.set(attackType, (resistsCount.get(attackType) || 0) + 1);
       });
     });
 
     const sharedWeaknesses = Array.from(weakTo.entries())
-      .filter(([type, count]) => count >= 2 && !resistsMap.has(type))
+      .filter(([, count]) => count >= 2)
+      .sort((a, b) => b[1] - a[1])
+      .map(([type, count]) => ({ type, count }));
+
+    // Types the team resists well (2+ members resist)
+    const teamResistances = Array.from(resistsCount.entries())
+      .filter(([, count]) => count >= 2)
       .map(([type]) => type);
+
+    // Team role balance
+    const roles = team.map(p => p.role || "Unknown");
+    const hasLead = roles.includes("Lead");
+    const hasCloser = roles.includes("Closer");
+    const hasSwitch = roles.includes("Safe Switch");
+    const roleBalance = { hasLead, hasCloser, hasSwitch, balanced: hasLead && hasCloser && hasSwitch };
 
     return {
       superEffectiveAgainst: Array.from(superEffectiveAgainst),
       notCovered: Array.from(notCovered),
       sharedWeaknesses,
+      teamResistances,
       coveragePercent: Math.round((superEffectiveAgainst.size / allTypes.length) * 100),
+      roleBalance,
     };
   }, [team]);
 
@@ -175,22 +267,41 @@ const TeamBuilderSection = () => {
           viewport={{ once: true }}
           className="mb-8"
         >
-          <h2 className="text-3xl md:text-4xl font-display text-gradient-gold mb-2">Team Builder</h2>
-          <p className="text-muted-foreground font-body">Pick up to 3 Pokémon and analyze your type coverage</p>
+          <h2 className="text-3xl md:text-4xl font-display text-gradient-gold mb-2">PvP Team Builder</h2>
+          <p className="text-muted-foreground font-body">Build a team of 3 for any league and analyze type coverage, weaknesses & role balance</p>
         </motion.div>
+
+        {/* League Selector */}
+        <div className="flex flex-wrap gap-2 mb-8">
+          {leagueConfig.map(l => (
+            <button
+              key={l.id}
+              onClick={() => switchLeague(l.id)}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-body font-semibold text-sm transition-all ${
+                league === l.id
+                  ? "bg-primary text-primary-foreground shadow-glow"
+                  : "bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/40"
+              }`}
+            >
+              <l.icon className="w-4 h-4" />
+              {l.name}
+              <span className="text-xs opacity-70">({l.cap})</span>
+            </button>
+          ))}
+        </div>
 
         <div className="grid lg:grid-cols-2 gap-8 max-w-5xl">
           {/* Team Slots */}
           <div className="space-y-4">
             <h3 className="text-sm font-body font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
-              <Users className="w-4 h-4 text-primary" /> Your Team
+              <Users className="w-4 h-4 text-primary" /> Your {currentLeague.name} Team
             </h3>
             <div className="space-y-3">
               {[0, 1, 2].map((slot) => {
                 const pokemon = team[slot];
                 return (
                   <motion.div
-                    key={slot}
+                    key={`${league}-${slot}`}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: slot * 0.1 }}
@@ -201,7 +312,10 @@ const TeamBuilderSection = () => {
                         <div className="flex items-center gap-3">
                           <span className="text-lg font-display text-primary">{slot + 1}</span>
                           <div>
-                            <p className="font-body font-semibold text-foreground">{pokemon.name}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="font-body font-semibold text-foreground">{pokemon.name}</p>
+                              {pokemon.role && <RoleBadge role={pokemon.role} />}
+                            </div>
                             <div className="mt-1">
                               {pokemon.types.map(t => <TypeBadge key={t} type={t} />)}
                             </div>
@@ -221,7 +335,9 @@ const TeamBuilderSection = () => {
                           className="w-full flex items-center justify-center gap-2 p-4 rounded-2xl border-2 border-dashed border-border hover:border-primary/40 text-muted-foreground hover:text-primary transition-all"
                         >
                           <Plus className="w-4 h-4" />
-                          <span className="font-body text-sm">Add Pokémon #{slot + 1}</span>
+                          <span className="font-body text-sm">
+                            Add {slot === 0 ? "Lead" : slot === 1 ? "Safe Switch" : "Closer"}
+                          </span>
                           <ChevronDown className={`w-4 h-4 transition-transform ${searchOpen === slot ? "rotate-180" : ""}`} />
                         </button>
                         {searchOpen === slot && (
@@ -238,7 +354,7 @@ const TeamBuilderSection = () => {
                               onChange={(e) => setSearchQuery(e.target.value)}
                               className="w-full px-4 py-3 bg-transparent border-b border-border text-foreground font-body text-sm placeholder:text-muted-foreground focus:outline-none"
                             />
-                            <div className="max-h-48 overflow-y-auto">
+                            <div className="max-h-52 overflow-y-auto">
                               {filteredPool.length === 0 ? (
                                 <p className="p-4 text-sm text-muted-foreground font-body text-center">No Pokémon found</p>
                               ) : (
@@ -248,7 +364,10 @@ const TeamBuilderSection = () => {
                                     onClick={() => addToTeam(p, slot)}
                                     className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-primary/5 transition-colors text-left"
                                   >
-                                    <span className="font-body text-sm text-foreground">{p.name}</span>
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-body text-sm text-foreground">{p.name}</span>
+                                      {p.role && <RoleBadge role={p.role} />}
+                                    </div>
                                     <div>{p.types.map(t => <TypeBadge key={t} type={t} />)}</div>
                                   </button>
                                 ))
@@ -267,11 +386,12 @@ const TeamBuilderSection = () => {
           {/* Coverage Analysis */}
           <div className="space-y-4">
             <h3 className="text-sm font-body font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
-              <Swords className="w-4 h-4 text-primary" /> Type Coverage Analysis
+              <Swords className="w-4 h-4 text-primary" /> Team Analysis
             </h3>
             {!coverage ? (
               <div className="p-8 rounded-2xl bg-card-gradient border border-border shadow-card text-center">
-                <p className="text-muted-foreground font-body">Add Pokémon to see your team's type coverage</p>
+                <Trophy className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+                <p className="text-muted-foreground font-body text-sm">Add Pokémon to see your team's type coverage & role balance</p>
               </div>
             ) : (
               <motion.div
@@ -287,7 +407,7 @@ const TeamBuilderSection = () => {
                   </div>
                   <div className="h-3 bg-muted rounded-full overflow-hidden">
                     <motion.div
-                      className="h-full rounded-full bg-primary"
+                      className={`h-full rounded-full ${coverage.coveragePercent >= 80 ? "bg-primary" : coverage.coveragePercent >= 50 ? "bg-secondary" : "bg-accent"}`}
                       initial={{ width: 0 }}
                       animate={{ width: `${coverage.coveragePercent}%` }}
                       transition={{ duration: 0.8, ease: "easeOut" }}
@@ -296,6 +416,30 @@ const TeamBuilderSection = () => {
                   <p className="text-xs text-muted-foreground font-body mt-2">
                     Super effective against {coverage.superEffectiveAgainst.length} of {allTypes.length} types
                   </p>
+                </div>
+
+                {/* Role Balance */}
+                <div className="p-4 rounded-2xl bg-card-gradient border border-border shadow-card">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Trophy className="w-4 h-4 text-primary" />
+                    <span className="font-body text-sm text-foreground font-semibold">Role Balance</span>
+                    {coverage.roleBalance.balanced && (
+                      <span className="text-[10px] font-body font-semibold px-2 py-0.5 rounded-lg bg-primary/15 text-primary">✓ Balanced</span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { label: "Lead", has: coverage.roleBalance.hasLead },
+                      { label: "Safe Switch", has: coverage.roleBalance.hasSwitch },
+                      { label: "Closer", has: coverage.roleBalance.hasCloser },
+                    ].map(r => (
+                      <div key={r.label} className={`p-2 rounded-xl text-center border ${r.has ? "bg-primary/10 border-primary/20" : "bg-muted/30 border-border"}`}>
+                        <p className={`text-[10px] font-body font-semibold uppercase ${r.has ? "text-primary" : "text-muted-foreground"}`}>
+                          {r.has ? "✓" : "✗"} {r.label}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Super Effective */}
@@ -312,6 +456,22 @@ const TeamBuilderSection = () => {
                     )}
                   </div>
                 </div>
+
+                {/* Team Resistances */}
+                {coverage.teamResistances.length > 0 && (
+                  <div className="p-4 rounded-2xl bg-primary/5 border border-primary/20 shadow-card">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Shield className="w-4 h-4 text-primary" />
+                      <span className="font-body text-sm text-foreground font-semibold">Strong Team Resistances</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {coverage.teamResistances.map(t => <TypeBadge key={t} type={t} />)}
+                    </div>
+                    <p className="text-[11px] text-muted-foreground font-body mt-2">
+                      2+ team members resist these types
+                    </p>
+                  </div>
+                )}
 
                 {/* Not Covered */}
                 {coverage.notCovered.length > 0 && (
@@ -334,10 +494,15 @@ const TeamBuilderSection = () => {
                       <span className="font-body text-sm text-destructive font-semibold">⚠ Shared Weaknesses</span>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
-                      {coverage.sharedWeaknesses.map(t => <TypeBadge key={t} type={t} />)}
+                      {coverage.sharedWeaknesses.map(({ type, count }) => (
+                        <span key={type} className="flex items-center gap-1">
+                          <TypeBadge type={type} />
+                          <span className="text-[10px] text-destructive font-mono font-bold">×{count}</span>
+                        </span>
+                      ))}
                     </div>
                     <p className="text-xs text-muted-foreground font-body mt-2">
-                      Multiple team members are weak to these types
+                      Multiple team members share these weaknesses — consider swapping
                     </p>
                   </div>
                 )}
