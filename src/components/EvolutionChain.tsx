@@ -100,8 +100,8 @@ async function fetchEvolutionChain(pokemonId: number): Promise<EvolutionChainDat
         if (formName.includes("mega")) category = "mega";
         if (formName.includes("gmax")) category = "gmax";
 
-        // Filter: Only show Mega if available in Pokémon GO, never show Gigantamax (not in GO)
-        if (category === "gmax") return null;
+        // Filter: Only show forms available in Pokémon GO
+        if (category === "gmax" && !goGmaxAvailable.has(baseName)) return null;
         if (category === "mega" && !goMegaAvailable.has(baseName)) return null;
 
         return {
