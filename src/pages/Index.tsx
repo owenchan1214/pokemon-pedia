@@ -26,6 +26,7 @@ const Index = () => {
       <TypeChartSection />
       <PokedexSection />
       <RaidCounterSection />
+      <MoveCalculatorSection />
       <IVCalculatorSection />
       <PvPTierListSection />
       <TeamBuilderSection />
