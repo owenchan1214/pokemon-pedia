@@ -33,6 +33,7 @@ const Index = () => {
       <PvPTierListSection />
       <TeamBuilderSection />
       <ComparisonSection />
+      <ChecklistSection />
       <LeaderboardSection />
       <Footer />
     </div>
