@@ -39,6 +39,48 @@ const getCounterTypes = (types: string[]): string[] => {
     .map(([type]) => type);
 };
 
+// Pokémon GO weather boost mapping
+const weatherBoostMap: Record<string, { weather: string; emoji: string }> = {
+  normal: { weather: "Partly Cloudy", emoji: "⛅" },
+  fire: { weather: "Sunny / Clear", emoji: "☀️" },
+  water: { weather: "Rainy", emoji: "🌧️" },
+  electric: { weather: "Rainy", emoji: "🌧️" },
+  grass: { weather: "Sunny / Clear", emoji: "☀️" },
+  ice: { weather: "Snowy", emoji: "❄️" },
+  fighting: { weather: "Cloudy", emoji: "☁️" },
+  poison: { weather: "Cloudy", emoji: "☁️" },
+  ground: { weather: "Sunny / Clear", emoji: "☀️" },
+  flying: { weather: "Windy", emoji: "💨" },
+  psychic: { weather: "Windy", emoji: "💨" },
+  bug: { weather: "Rainy", emoji: "🌧️" },
+  rock: { weather: "Partly Cloudy", emoji: "⛅" },
+  ghost: { weather: "Foggy", emoji: "🌫️" },
+  dragon: { weather: "Windy", emoji: "💨" },
+  dark: { weather: "Foggy", emoji: "🌫️" },
+  steel: { weather: "Snowy", emoji: "❄️" },
+  fairy: { weather: "Cloudy", emoji: "☁️" },
+};
+
+const getWeatherBoosts = (types: string[]): { weather: string; emoji: string; types: string[] }[] => {
+  const weatherMap = new Map<string, { emoji: string; types: string[] }>();
+  types.forEach(t => {
+    const boost = weatherBoostMap[t];
+    if (boost) {
+      const existing = weatherMap.get(boost.weather);
+      if (existing) {
+        existing.types.push(t);
+      } else {
+        weatherMap.set(boost.weather, { emoji: boost.emoji, types: [t] });
+      }
+    }
+  });
+  return Array.from(weatherMap.entries()).map(([weather, data]) => ({
+    weather,
+    emoji: data.emoji,
+    types: data.types,
+  }));
+};
+
 type PokemonData = {
   name: string;
   id: number;
