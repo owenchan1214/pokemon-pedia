@@ -71,10 +71,13 @@ const EventsSection = () => {
                     <p className="font-body font-semibold text-foreground truncate">{event.name}</p>
                     <p className="text-sm text-muted-foreground font-body">{event.date}</p>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-body font-medium ${event.tagColor} shrink-0`}>
-                    {isLive && <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary mr-1.5 animate-pulse-glow" />}
-                    {event.tag}
-                  </span>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <CountdownTimer targetDate={event.end} label="" inline />
+                    <span className={`px-3 py-1 rounded-full text-xs font-body font-medium ${event.tagColor} hidden sm:inline-flex items-center`}>
+                      {isLive && <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary mr-1.5 animate-pulse-glow" />}
+                      {event.tag}
+                    </span>
+                  </div>
                 </motion.div>
               );
             })}
