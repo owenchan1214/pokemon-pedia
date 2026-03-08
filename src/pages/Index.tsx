@@ -14,6 +14,7 @@ import TeamBuilderSection from "@/components/TeamBuilderSection";
 import ComparisonSection from "@/components/ComparisonSection";
 import BuddyCalculatorSection from "@/components/BuddyCalculatorSection";
 import SpawnNestSection from "@/components/SpawnNestSection";
+import ShinyOddsCalculator from "@/components/ShinyOddsCalculator";
 import ChecklistSection from "@/components/ChecklistSection";
 import LeaderboardSection from "@/components/LeaderboardSection";
 import Footer from "@/components/Footer";
