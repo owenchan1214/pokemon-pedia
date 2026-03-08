@@ -24,6 +24,14 @@ const goMegaAvailable = new Set([
   "lucario", "abomasnow", "gallade", "diancie", "groudon", "kyogre",
 ]);
 
+// Pokémon GO available Gigantamax forms (Dynamax feature added 2024-2025)
+const goGmaxAvailable = new Set([
+  "charizard", "blastoise", "venusaur", "pikachu", "eevee",
+  "snorlax", "gengar", "machamp", "lapras", "kingler",
+  "toxtricity", "alcremie", "duraludon", "urshifu",
+  "rillaboom", "cinderace", "inteleon",
+]);
+
 type EvoStage = {
   name: string;
   id: number;
