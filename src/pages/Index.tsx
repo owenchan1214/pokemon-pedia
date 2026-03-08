@@ -31,6 +31,7 @@ const Index = () => {
       <IVCalculatorSection />
       <PvPTierListSection />
       <TeamBuilderSection />
+      <ComparisonSection />
       <LeaderboardSection />
       <Footer />
     </div>
