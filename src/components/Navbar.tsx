@@ -16,6 +16,7 @@ const links = [
   { href: "#buddycalc", label: "Buddy" },
   { href: "#spawns", label: "Spawns" },
   { href: "#shinyodds", label: "Shiny" },
+  { href: "#luckytrade", label: "Trades" },
   { href: "#checklist", label: "Checklist" },
   { href: "#leaderboard", label: "Leaderboard" },
 ];
