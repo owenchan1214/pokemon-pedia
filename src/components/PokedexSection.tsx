@@ -42,6 +42,7 @@ type PokemonData = {
   name: string;
   id: number;
   sprite: string;
+  shinySprite: string;
   types: string[];
   stats: { name: string; value: number }[];
   moves: { name: string; type: string; learnMethod: string }[];
@@ -75,6 +76,7 @@ const PokedexSection = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [searched, setSearched] = useState(false);
+  const [showShiny, setShowShiny] = useState(false);
 
   const searchPokemon = useCallback(async (name: string) => {
     const trimmed = name.trim().toLowerCase();
@@ -122,12 +124,14 @@ const PokedexSection = () => {
         name: data.name,
         id: data.id,
         sprite: data.sprites?.other?.["official-artwork"]?.front_default || data.sprites?.front_default || "",
+        shinySprite: data.sprites?.other?.["official-artwork"]?.front_shiny || data.sprites?.front_shiny || "",
         types: data.types.map((t: any) => t.type.name),
         stats: data.stats.map((s: any) => ({ name: s.stat.name, value: s.base_stat })),
         moves: moveDetails,
         height: data.height / 10,
         weight: data.weight / 10,
       });
+      setShowShiny(false);
     } catch {
       setError("Pokémon not found. Try a name (e.g. pikachu) or Pokédex number.");
     } finally {
@@ -194,12 +198,26 @@ const PokedexSection = () => {
             >
               {/* Left: Image + Info */}
               <div className="flex flex-col items-center p-5 rounded-2xl bg-card-gradient border border-border shadow-card">
-                <img
-                  src={pokemon.sprite}
-                  alt={pokemon.name}
-                  className="w-40 h-40 object-contain mb-3"
-                  loading="lazy"
-                />
+                <div className="relative">
+                  <img
+                    src={showShiny && pokemon.shinySprite ? pokemon.shinySprite : pokemon.sprite}
+                    alt={`${pokemon.name}${showShiny ? " shiny" : ""}`}
+                    className="w-40 h-40 object-contain mb-1"
+                    loading="lazy"
+                  />
+                  {pokemon.shinySprite && (
+                    <button
+                      onClick={() => setShowShiny(!showShiny)}
+                      className={`absolute top-0 right-0 px-2 py-1 rounded-lg text-[10px] font-body font-semibold transition-all ${
+                        showShiny
+                          ? "bg-[hsl(var(--shiny))]/20 text-[hsl(var(--shiny))] border border-[hsl(var(--shiny))]/30"
+                          : "bg-muted text-muted-foreground hover:bg-muted/80 border border-border"
+                      }`}
+                    >
+                      ✨ {showShiny ? "Shiny" : "Normal"}
+                    </button>
+                  )}
+                </div>
                 <p className="text-xs text-muted-foreground font-mono mb-1">#{String(pokemon.id).padStart(4, "0")}</p>
                 <h3 className="text-xl font-display text-foreground capitalize mb-2">{pokemon.name}</h3>
                 <div className="flex gap-1.5 mb-3">
