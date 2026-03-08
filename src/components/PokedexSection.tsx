@@ -293,7 +293,7 @@ const PokedexSection = () => {
                 </div>
 
                 {/* Evolution Chain */}
-                <EvolutionChain pokemonId={pokemon.id} pokemonName={pokemon.name} />
+                <EvolutionChain pokemonId={pokemon.id} pokemonName={pokemon.name} onSelectPokemon={(name) => { setQuery(name); searchPokemon(name); }} />
               </div>
             </motion.div>
           )}

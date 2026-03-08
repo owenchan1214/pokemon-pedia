@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, Crown } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const typeColorMap: Record<string, string> = {
@@ -10,6 +10,19 @@ const typeColorMap: Record<string, string> = {
   rock: "bg-[hsl(45,45%,40%)]", ghost: "bg-[hsl(265,35%,40%)]", dragon: "bg-[hsl(260,70%,50%)]",
   dark: "bg-[hsl(25,25%,32%)]", steel: "bg-[hsl(220,15%,60%)]", fairy: "bg-[hsl(330,50%,65%)]",
 };
+
+// Pokémon GO available Mega Evolutions (as of 2026)
+const goMegaAvailable = new Set([
+  "venusaur", "charizard", "blastoise", "beedrill", "pidgeot",
+  "alakazam", "slowbro", "gengar", "kangaskhan", "pinsir",
+  "gyarados", "aerodactyl", "ampharos", "steelix", "scizor",
+  "heracross", "houndoom", "tyranitar", "sceptile", "blaziken",
+  "swampert", "gardevoir", "sableye", "mawile", "aggron",
+  "medicham", "manectric", "sharpedo", "camerupt", "altaria",
+  "banette", "absol", "glalie", "salamence", "metagross",
+  "latias", "latios", "rayquaza", "lopunny", "garchomp",
+  "lucario", "abomasnow", "gallade", "diancie", "groudon", "kyogre",
+]);
 
 type EvoStage = {
   name: string;
@@ -40,10 +53,8 @@ const TypeBadge = ({ type }: { type: string }) => (
   </span>
 );
 
-// Parse evolution chain recursively
 function parseChain(chain: any): { name: string; trigger?: string; minLevel?: number | null; item?: string | null }[] {
   const results: { name: string; trigger?: string; minLevel?: number | null; item?: string | null }[] = [];
-  
   function walk(node: any) {
     const details = node.evolution_details?.[0];
     results.push({
@@ -53,26 +64,22 @@ function parseChain(chain: any): { name: string; trigger?: string; minLevel?: nu
       item: details?.item?.name?.replace(/-/g, " ") || details?.held_item?.name?.replace(/-/g, " "),
     });
     if (node.evolves_to?.length) {
-      // Follow main evolution path
       node.evolves_to.forEach((e: any) => walk(e));
     }
   }
-  
   walk(chain);
   return results;
 }
 
 async function fetchEvolutionChain(pokemonId: number): Promise<EvolutionChainData> {
-  // Get species data for evolution chain URL
   const speciesRes = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemonId}`);
   if (!speciesRes.ok) throw new Error("Species not found");
   const speciesData = await speciesRes.json();
 
-  // Get varieties (mega, gmax, etc)
   const specialForms: SpecialForm[] = [];
   const varieties = speciesData.varieties || [];
-  
-  // Fetch special forms in parallel
+  const baseName = speciesData.name;
+
   const formPromises = varieties
     .filter((v: any) => !v.is_default)
     .slice(0, 4)
@@ -80,11 +87,15 @@ async function fetchEvolutionChain(pokemonId: number): Promise<EvolutionChainDat
       try {
         const formRes = await fetch(v.pokemon.url);
         const formData = await formRes.json();
-        const formName = v.pokemon.name.replace(`${speciesData.name}-`, "");
+        const formName = v.pokemon.name.replace(`${baseName}-`, "");
         let category: "mega" | "gmax" | "other" = "other";
         if (formName.includes("mega")) category = "mega";
         if (formName.includes("gmax")) category = "gmax";
-        
+
+        // Filter: Only show Mega if available in Pokémon GO, never show Gigantamax (not in GO)
+        if (category === "gmax") return null;
+        if (category === "mega" && !goMegaAvailable.has(baseName)) return null;
+
         return {
           name: v.pokemon.name,
           formName: formName.replace(/-/g, " "),
@@ -100,14 +111,11 @@ async function fetchEvolutionChain(pokemonId: number): Promise<EvolutionChainDat
   const formResults = await Promise.all(formPromises);
   formResults.forEach(f => { if (f) specialForms.push(f); });
 
-  // Get evolution chain
   const evoRes = await fetch(speciesData.evolution_chain.url);
   if (!evoRes.ok) throw new Error("Evolution chain not found");
   const evoData = await evoRes.json();
-
   const parsed = parseChain(evoData.chain);
 
-  // Fetch pokemon data for each stage in parallel
   const stagePromises = parsed.map(async (stage) => {
     try {
       const pokRes = await fetch(`https://pokeapi.co/api/v2/pokemon/${stage.name}`);
@@ -119,21 +127,21 @@ async function fetchEvolutionChain(pokemonId: number): Promise<EvolutionChainDat
         types: pokData.types.map((t: any) => t.type.name),
       } as EvoStage;
     } catch {
-      return {
-        ...stage,
-        id: 0,
-        sprite: "",
-        types: [],
-      } as EvoStage;
+      return { ...stage, id: 0, sprite: "", types: [] } as EvoStage;
     }
   });
 
   const chain = await Promise.all(stagePromises);
-
   return { chain, specialForms };
 }
 
-const EvolutionChain = ({ pokemonId, pokemonName }: { pokemonId: number; pokemonName: string }) => {
+type Props = {
+  pokemonId: number;
+  pokemonName: string;
+  onSelectPokemon?: (name: string) => void;
+};
+
+const EvolutionChain = ({ pokemonId, pokemonName, onSelectPokemon }: Props) => {
   const [data, setData] = useState<EvolutionChainData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -158,16 +166,14 @@ const EvolutionChain = ({ pokemonId, pokemonName }: { pokemonId: number; pokemon
     );
   }
 
-  if (!data || data.chain.length <= 1 && data.specialForms.length === 0) {
-    return null; // No evolutions and no special forms
+  if (!data || (data.chain.length <= 1 && data.specialForms.length === 0)) {
+    return null;
   }
 
   const megaForms = data.specialForms.filter(f => f.category === "mega");
-  const gmaxForms = data.specialForms.filter(f => f.category === "gmax");
 
   return (
     <div className="space-y-4">
-      {/* Evolution Chain */}
       {data.chain.length > 1 && (
         <div className="p-4 rounded-2xl bg-card-gradient border border-border shadow-card">
           <h4 className="text-xs font-body font-semibold text-foreground uppercase tracking-wider mb-4">Evolution Chain</h4>
@@ -188,9 +194,15 @@ const EvolutionChain = ({ pokemonId, pokemonName }: { pokemonId: number; pokemon
                     </span>
                   </div>
                 )}
-                <div className={`flex flex-col items-center p-2 rounded-xl transition-all ${
-                  stage.name === pokemonName ? "bg-primary/10 border border-primary/30" : "hover:bg-muted/40"
-                }`}>
+                <button
+                  onClick={() => onSelectPokemon?.(stage.name)}
+                  className={`flex flex-col items-center p-2 rounded-xl transition-all cursor-pointer ${
+                    stage.name === pokemonName
+                      ? "bg-primary/10 border border-primary/30"
+                      : "hover:bg-muted/40 hover:scale-105"
+                  }`}
+                  title={`View ${stage.name}`}
+                >
                   {stage.sprite && (
                     <img src={stage.sprite} alt={stage.name} className="w-16 h-16 object-contain" loading="lazy" />
                   )}
@@ -198,18 +210,17 @@ const EvolutionChain = ({ pokemonId, pokemonName }: { pokemonId: number; pokemon
                   <div className="flex gap-0.5 mt-0.5">
                     {stage.types.map(t => <TypeBadge key={t} type={t} />)}
                   </div>
-                </div>
+                </button>
               </motion.div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Mega Evolutions */}
       {megaForms.length > 0 && (
         <div className="p-4 rounded-2xl bg-card-gradient border border-[hsl(var(--mega))]/30 shadow-card">
           <h4 className="text-xs font-body font-semibold text-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-            <Sparkles className="w-3.5 h-3.5 text-[hsl(var(--mega))]" /> Mega Evolution{megaForms.length > 1 ? "s" : ""}
+            <Sparkles className="w-3.5 h-3.5 text-[hsl(var(--mega))]" /> Mega Evolution{megaForms.length > 1 ? "s" : ""} (Pokémon GO)
           </h4>
           <div className="flex flex-wrap gap-4 justify-center">
             {megaForms.map((form, i) => (
@@ -219,34 +230,6 @@ const EvolutionChain = ({ pokemonId, pokemonName }: { pokemonId: number; pokemon
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
                 className="flex flex-col items-center p-3 rounded-xl bg-[hsl(var(--mega))]/5 border border-[hsl(var(--mega))]/20"
-              >
-                {form.sprite && (
-                  <img src={form.sprite} alt={form.formName} className="w-20 h-20 object-contain" loading="lazy" />
-                )}
-                <span className="text-[11px] font-body text-foreground capitalize mt-1 font-semibold">{form.formName}</span>
-                <div className="flex gap-0.5 mt-1">
-                  {form.types.map(t => <TypeBadge key={t} type={t} />)}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Gigantamax */}
-      {gmaxForms.length > 0 && (
-        <div className="p-4 rounded-2xl bg-card-gradient border border-[hsl(var(--legendary))]/30 shadow-card">
-          <h4 className="text-xs font-body font-semibold text-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-            <Crown className="w-3.5 h-3.5 text-[hsl(var(--legendary))]" /> Gigantamax
-          </h4>
-          <div className="flex flex-wrap gap-4 justify-center">
-            {gmaxForms.map((form, i) => (
-              <motion.div
-                key={form.name}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                className="flex flex-col items-center p-3 rounded-xl bg-[hsl(var(--legendary))]/5 border border-[hsl(var(--legendary))]/20"
               >
                 {form.sprite && (
                   <img src={form.sprite} alt={form.formName} className="w-20 h-20 object-contain" loading="lazy" />
