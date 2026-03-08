@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Search, X, Loader2, Swords, Shield, Zap, Heart, Activity, Wind } from "lucide-react";
+import { Search, X, Loader2, Swords, Shield, Zap, Heart, Activity, Wind, CloudSun } from "lucide-react";
 import { useState, useCallback } from "react";
 import EvolutionChain from "./EvolutionChain";
 
@@ -37,6 +37,48 @@ const getCounterTypes = (types: string[]): string[] => {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 4)
     .map(([type]) => type);
+};
+
+// Pokémon GO weather boost mapping
+const weatherBoostMap: Record<string, { weather: string; emoji: string }> = {
+  normal: { weather: "Partly Cloudy", emoji: "⛅" },
+  fire: { weather: "Sunny / Clear", emoji: "☀️" },
+  water: { weather: "Rainy", emoji: "🌧️" },
+  electric: { weather: "Rainy", emoji: "🌧️" },
+  grass: { weather: "Sunny / Clear", emoji: "☀️" },
+  ice: { weather: "Snowy", emoji: "❄️" },
+  fighting: { weather: "Cloudy", emoji: "☁️" },
+  poison: { weather: "Cloudy", emoji: "☁️" },
+  ground: { weather: "Sunny / Clear", emoji: "☀️" },
+  flying: { weather: "Windy", emoji: "💨" },
+  psychic: { weather: "Windy", emoji: "💨" },
+  bug: { weather: "Rainy", emoji: "🌧️" },
+  rock: { weather: "Partly Cloudy", emoji: "⛅" },
+  ghost: { weather: "Foggy", emoji: "🌫️" },
+  dragon: { weather: "Windy", emoji: "💨" },
+  dark: { weather: "Foggy", emoji: "🌫️" },
+  steel: { weather: "Snowy", emoji: "❄️" },
+  fairy: { weather: "Cloudy", emoji: "☁️" },
+};
+
+const getWeatherBoosts = (types: string[]): { weather: string; emoji: string; types: string[] }[] => {
+  const weatherMap = new Map<string, { emoji: string; types: string[] }>();
+  types.forEach(t => {
+    const boost = weatherBoostMap[t];
+    if (boost) {
+      const existing = weatherMap.get(boost.weather);
+      if (existing) {
+        existing.types.push(t);
+      } else {
+        weatherMap.set(boost.weather, { emoji: boost.emoji, types: [t] });
+      }
+    }
+  });
+  return Array.from(weatherMap.entries()).map(([weather, data]) => ({
+    weather,
+    emoji: data.emoji,
+    types: data.types,
+  }));
 };
 
 type PokemonData = {
@@ -146,6 +188,7 @@ const PokedexSection = () => {
   };
 
   const counterTypes = pokemon ? getCounterTypes(pokemon.types) : [];
+  const weatherBoosts = pokemon ? getWeatherBoosts(pokemon.types) : [];
 
   return (
     <section id="pokedex" className="py-20 bg-card/30">
@@ -279,7 +322,31 @@ const PokedexSection = () => {
                   </p>
                 </div>
 
-                {/* Moves */}
+                {/* Weather Boost */}
+                {weatherBoosts.length > 0 && (
+                  <div className="p-4 rounded-2xl bg-card-gradient border border-border shadow-card">
+                    <h4 className="text-xs font-body font-semibold text-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+                      <CloudSun className="w-3.5 h-3.5 text-secondary" /> Weather Boost
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {weatherBoosts.map(wb => (
+                        <div key={wb.weather} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary/10 border border-secondary/20">
+                          <span className="text-lg">{wb.emoji}</span>
+                          <div>
+                            <p className="text-xs font-body text-foreground font-semibold">{wb.weather}</p>
+                            <p className="text-[10px] text-muted-foreground font-body capitalize">
+                              Boosts {wb.types.join(" & ")} moves
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-[11px] text-muted-foreground font-body mt-2">
+                      {pokemon?.name && `${pokemon.name} is stronger in these weather conditions`}
+                    </p>
+                  </div>
+                )}
+
                 <div className="p-4 rounded-2xl bg-card-gradient border border-border shadow-card">
                   <h4 className="text-xs font-body font-semibold text-foreground uppercase tracking-wider mb-3">Notable Moves</h4>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
