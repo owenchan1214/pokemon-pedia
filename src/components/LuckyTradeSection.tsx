@@ -311,23 +311,68 @@ const LuckyTradeSection = () => {
                       key={poke.name}
                       initial={{ opacity: 0, x: 10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      className="flex items-center gap-2.5 p-2 rounded-xl bg-muted/30 border border-border hover:bg-muted/50 transition-colors group"
+                      className="rounded-xl bg-muted/30 border border-border hover:bg-muted/50 transition-colors group overflow-hidden"
                     >
-                      <img src={poke.sprite} alt={poke.name} className="w-10 h-10 object-contain" loading="lazy" />
-                      <div className="flex-1 min-w-0">
-                        <span className="text-xs font-body text-foreground font-medium capitalize block truncate">{poke.name}</span>
-                        <div className="flex gap-0.5">
-                          {poke.types.map(t => (
-                            <span key={t} className={`inline-block px-1 py-0.5 rounded text-[8px] text-white font-semibold capitalize ${typeColorMap[t]}`}>{t}</span>
-                          ))}
-                        </div>
-                      </div>
                       <button
-                        onClick={() => removeLucky(poke.name)}
-                        className="p-1 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-destructive/10 transition-all"
+                        onClick={() => setExpandedPoke(expandedPoke === poke.name ? null : poke.name)}
+                        className="flex items-center gap-2.5 p-2 w-full text-left"
                       >
-                        <X className="w-3 h-3 text-destructive" />
+                        <img src={poke.sprite} alt={poke.name} className="w-10 h-10 object-contain" loading="lazy" />
+                        <div className="flex-1 min-w-0">
+                          <span className="text-xs font-body text-foreground font-medium capitalize block truncate">{poke.name}</span>
+                          <div className="flex gap-0.5">
+                            {poke.types.map(t => (
+                              <span key={t} className={`inline-block px-1 py-0.5 rounded text-[8px] text-white font-semibold capitalize ${typeColorMap[t]}`}>{t}</span>
+                            ))}
+                          </div>
+                        </div>
+                        <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground transition-transform ${expandedPoke === poke.name ? "rotate-180" : ""}`} />
                       </button>
+                      <AnimatePresence>
+                        {expandedPoke === poke.name && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="px-3 pb-3 pt-1 space-y-2 border-t border-border/50">
+                              <div className="flex items-center gap-4">
+                                <img src={poke.sprite} alt={poke.name} className="w-20 h-20 object-contain" />
+                                <div className="space-y-1">
+                                  <p className="text-sm font-body text-foreground font-semibold capitalize">{poke.name}</p>
+                                  <p className="text-[10px] font-mono text-muted-foreground">#{String(poke.id).padStart(3, "0")}</p>
+                                  <div className="flex gap-1">
+                                    {poke.types.map(t => (
+                                      <span key={t} className={`inline-block px-1.5 py-0.5 rounded text-[9px] text-white font-semibold capitalize ${typeColorMap[t]}`}>{t}</span>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-2 gap-2">
+                                <div className="p-2 rounded-lg bg-[hsl(var(--shiny))]/10 border border-[hsl(var(--shiny))]/15">
+                                  <p className="text-[9px] text-muted-foreground font-body uppercase">IV Floor</p>
+                                  <p className="text-xs font-mono text-[hsl(var(--shiny))] font-bold">12/12/12</p>
+                                </div>
+                                <div className="p-2 rounded-lg bg-primary/10 border border-primary/15">
+                                  <p className="text-[9px] text-muted-foreground font-body uppercase">Dust Discount</p>
+                                  <p className="text-xs font-mono text-primary font-bold">50% off</p>
+                                </div>
+                              </div>
+                              <p className="text-[10px] text-muted-foreground font-body">
+                                Added {new Date(poke.addedAt).toLocaleDateString()}
+                              </p>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); removeLucky(poke.name); }}
+                                className="flex items-center gap-1 text-[10px] text-destructive font-body hover:underline"
+                              >
+                                <X className="w-3 h-3" /> Remove from collection
+                              </button>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </motion.div>
                   ))
                 )}
