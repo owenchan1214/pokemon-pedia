@@ -67,6 +67,7 @@ const LuckyTradeSection = () => {
   const [friendship, setFriendship] = useState<FriendshipLevel>("best");
   const [tradeType, setTradeType] = useState<TradeCategory>("standard");
   const [isLucky, setIsLucky] = useState(false);
+  const [expandedPoke, setExpandedPoke] = useState<string | null>(null);
 
   useEffect(() => {
     localStorage.setItem("luckyPokemon", JSON.stringify(luckyList));
