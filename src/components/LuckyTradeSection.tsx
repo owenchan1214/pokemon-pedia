@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
-import { Star, HandshakeIcon, Search, X, Loader2, Sparkles, Users, ArrowRightLeft } from "lucide-react";
+import { Star, HandshakeIcon, Search, X, Loader2, Sparkles, Users, ArrowRightLeft, ChevronDown, Info } from "lucide-react";
 import { useState, useCallback, useEffect } from "react";
+import { AnimatePresence } from "framer-motion";
 
 const typeColorMap: Record<string, string> = {
   normal: "bg-[hsl(60,10%,55%)]", fire: "bg-[hsl(15,80%,50%)]", water: "bg-[hsl(220,70%,55%)]",
