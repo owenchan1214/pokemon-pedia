@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, Star, Bug, Flame, Swords, Search, ChevronDown, Gift, Sparkles, List, CalendarDays, Filter } from "lucide-react";
+import { Calendar, Star, Bug, Flame, Swords, Search, ChevronDown, Gift, Sparkles, List, CalendarDays, Filter, ChevronLeft, ChevronRight, Bell, BellOff, BellRing } from "lucide-react";
 import CountdownTimer from "./CountdownTimer";
 
 interface EventDetails {
@@ -23,6 +23,7 @@ interface GameEvent {
 }
 
 const events: GameEvent[] = [
+  // === MARCH 2026 ===
   {
     date: "Mar 3 – 9", name: "Pokémon 30th Anniversary Event", icon: Star,
     tag: "Live", tagColor: "bg-primary/15 text-primary",
@@ -103,13 +104,81 @@ const events: GameEvent[] = [
   },
   {
     date: "Mar 31 – Apr 6", name: "Spring into Spring Event", icon: Calendar,
-    tag: "Upcoming", tagColor: "bg-secondary/15 text-secondary",
+    tag: "Event", tagColor: "bg-secondary/15 text-secondary",
     start: new Date("2026-03-31"), end: new Date("2026-04-06T20:00:00"),
     details: {
       description: "Celebrate the start of spring with flower-crowned Pokémon, egg-themed bonuses, and seasonal spawns.",
       bonuses: ["½ Egg Hatch Distance", "2× Hatch Candy", "Spring-themed avatar items"],
       spawns: ["Flower Crown Eevee", "Flower Crown Chansey", "Cherubi", "Deerling (Spring)"],
       raids: ["Mega Lopunny (Mega Raid)", "Togekiss (Tier 3)"],
+    }
+  },
+  // === APRIL 2026 ===
+  {
+    date: "Apr 4, 2–5 PM", name: "Sobble Community Day", icon: Calendar,
+    tag: "Community Day", tagColor: "bg-accent/15 text-accent",
+    start: new Date("2026-04-04"), end: new Date("2026-04-04T17:00:00"),
+    details: {
+      description: "Sobble takes center stage! Evolve Drizzile into Inteleon during or up to 5 hours after the event to get an exclusive move.",
+      bonuses: ["2× Catch Candy", "2× Candy XL (Lv.31+)", "¼ Egg Hatch Distance", "3-hour Incense & Lure duration"],
+      spawns: ["Sobble (massively boosted)", "Shiny Sobble (~1/25 rate)"],
+      raids: ["Drizzile (Tier 1)", "Inteleon (Tier 4)"],
+      exclusiveMoves: ["Hydro Cannon (Charged)"],
+    }
+  },
+  {
+    date: "Apr 7 – 13", name: "Fairy Festival", icon: Sparkles,
+    tag: "Event", tagColor: "bg-secondary/15 text-secondary",
+    start: new Date("2026-04-07"), end: new Date("2026-04-13T20:00:00"),
+    details: {
+      description: "Fairy-type Pokémon fill the wild! Clefairy, Spritzee, Swirlix and more appear with boosted shiny rates.",
+      bonuses: ["2× Catch Stardust for Fairy-types", "New Fairy-themed Field Research", "Fairy avatar accessories"],
+      spawns: ["Clefairy", "Spritzee", "Swirlix", "Cottonee", "Fidough (NEW)"],
+      raids: ["Xerneas (Tier 5)", "Mega Gardevoir (Mega Raid)"],
+    }
+  },
+  {
+    date: "Apr 14 – 20", name: "Earth Day Cleanup Event", icon: Calendar,
+    tag: "Event", tagColor: "bg-secondary/15 text-secondary",
+    start: new Date("2026-04-14"), end: new Date("2026-04-20T20:00:00"),
+    details: {
+      description: "Celebrate Earth Day with Ground and Rock-type spawns. Bonus rewards for walking and hatching eggs.",
+      bonuses: ["2× Hatch Candy", "½ Egg Hatch Distance", "Earth Day-themed Timed Research"],
+      spawns: ["Sandshrew", "Geodude", "Larvitar", "Drilbur", "Nacli (NEW)"],
+      raids: ["Groudon (Tier 5)", "Mega Steelix (Mega Raid)"],
+    }
+  },
+  {
+    date: "Apr 18", name: "Raid Day: Tapu Fini", icon: Swords,
+    tag: "Battle", tagColor: "bg-accent/15 text-accent",
+    start: new Date("2026-04-18"), end: new Date("2026-04-18T19:00:00"),
+    details: {
+      description: "Tapu Fini returns for a special Raid Day with boosted shiny rates and up to 5 free Raid Passes.",
+      bonuses: ["5 free Raid Passes from gyms", "Boosted shiny Tapu Fini rate", "2× Raid XP"],
+      spawns: ["Tapu Fini raid encounters only"],
+      raids: ["Tapu Fini (Tier 5, boosted shiny)"],
+    }
+  },
+  {
+    date: "Apr 22 – 28", name: "Rivals Week", icon: Swords,
+    tag: "Event", tagColor: "bg-secondary/15 text-secondary",
+    start: new Date("2026-04-22"), end: new Date("2026-04-28T20:00:00"),
+    details: {
+      description: "Rival Pokémon pairs appear together! Zangoose & Seviper, Throh & Sawk, and more spawn worldwide.",
+      bonuses: ["2× Catch XP", "Rival-themed Collection Challenge", "Team GO Rocket encounters boosted"],
+      spawns: ["Zangoose", "Seviper", "Throh", "Sawk", "Heatmor", "Durant"],
+      raids: ["Mega Absol (Mega Raid)", "Registeel (Tier 5)"],
+    }
+  },
+  {
+    date: "Apr 25", name: "Research Day: Unown", icon: Search,
+    tag: "Research", tagColor: "bg-legendary/15 text-legendary",
+    start: new Date("2026-04-25"), end: new Date("2026-04-25T20:00:00"),
+    details: {
+      description: "Special Research Day featuring Unown encounters from Field Research tasks. New Unown letters available!",
+      bonuses: ["Exclusive Unown Field Research", "Boosted shiny Unown chance", "Bonus Research slots"],
+      spawns: ["Unown (various letters)", "Sigilyph (rare)"],
+      raids: ["Standard raid pool"],
     }
   },
 ];
@@ -136,8 +205,8 @@ const getNextEvent = () => {
   return events.find(e => e.end > now) || events[events.length - 1];
 };
 
-// Calendar helpers
 const DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 function getCalendarDays(year: number, month: number) {
   const firstDay = new Date(year, month, 1).getDay();
@@ -157,7 +226,6 @@ function getEventsForDay(day: number, month: number, year: number, filteredEvent
   });
 }
 
-// Compact tag dot color
 function getTagDotColor(tag: string) {
   switch (tag) {
     case "Live": return "bg-primary";
@@ -170,17 +238,102 @@ function getTagDotColor(tag: string) {
   }
 }
 
+// === Notification helpers ===
+const REMINDER_KEY = "pgo-event-reminders";
+
+function loadReminders(): Record<string, number> {
+  try {
+    return JSON.parse(localStorage.getItem(REMINDER_KEY) || "{}");
+  } catch { return {}; }
+}
+
+function saveReminders(reminders: Record<string, number>) {
+  localStorage.setItem(REMINDER_KEY, JSON.stringify(reminders));
+}
+
+async function requestNotificationPermission(): Promise<boolean> {
+  if (!("Notification" in window)) return false;
+  if (Notification.permission === "granted") return true;
+  if (Notification.permission === "denied") return false;
+  const result = await Notification.requestPermission();
+  return result === "granted";
+}
+
+function scheduleNotification(event: GameEvent, reminders: Record<string, number>): Record<string, number> {
+  const msUntilStart = event.start.getTime() - Date.now() - 30 * 60 * 1000; // 30 min before
+  if (msUntilStart <= 0) {
+    // Event already started, notify immediately
+    new Notification(`🎮 ${event.name}`, { body: `This event is live now! ${event.date}`, icon: "/favicon.ico" });
+    const updated = { ...reminders, [event.name]: -1 };
+    saveReminders(updated);
+    return updated;
+  }
+  const timerId = window.setTimeout(() => {
+    new Notification(`🎮 ${event.name} starts in 30 minutes!`, { body: event.date, icon: "/favicon.ico" });
+  }, msUntilStart);
+  const updated = { ...reminders, [event.name]: timerId };
+  saveReminders(updated);
+  return updated;
+}
+
+function cancelReminder(eventName: string, reminders: Record<string, number>): Record<string, number> {
+  const timerId = reminders[eventName];
+  if (timerId && timerId > 0) window.clearTimeout(timerId);
+  const updated = { ...reminders };
+  delete updated[eventName];
+  saveReminders(updated);
+  return updated;
+}
+
+// Available months for navigation
+const AVAILABLE_MONTHS = [
+  { year: 2026, month: 2, label: "March 2026" },
+  { year: 2026, month: 3, label: "April 2026" },
+];
+
 const EventsSection = () => {
   const nextEvent = getNextEvent();
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [selectedCalendarDay, setSelectedCalendarDay] = useState<number | null>(null);
+  const [calMonthIdx, setCalMonthIdx] = useState(0);
+  const [reminders, setReminders] = useState<Record<string, number>>(loadReminders);
+  const [notifSupported, setNotifSupported] = useState(true);
+
+  useEffect(() => {
+    setNotifSupported("Notification" in window);
+  }, []);
+
+  const currentCalMonth = AVAILABLE_MONTHS[calMonthIdx];
 
   const filteredEvents = useMemo(() => {
-    if (activeFilters.length === 0) return events;
-    return events.filter(e => activeFilters.includes(e.tag));
+    let filtered = events;
+    if (activeFilters.length > 0) {
+      filtered = filtered.filter(e => activeFilters.includes(e.tag));
+    }
+    return filtered;
   }, [activeFilters]);
+
+  // Events for the current calendar month
+  const monthEvents = useMemo(() => {
+    return filteredEvents.filter(e => {
+      const startMonth = e.start.getMonth();
+      const endMonth = e.end.getMonth();
+      const startYear = e.start.getFullYear();
+      const endYear = e.end.getFullYear();
+      return (
+        (startYear === currentCalMonth.year && startMonth === currentCalMonth.month) ||
+        (endYear === currentCalMonth.year && endMonth === currentCalMonth.month)
+      );
+    });
+  }, [filteredEvents, calMonthIdx]);
+
+  // Events for list view based on selected month
+  const listEvents = useMemo(() => {
+    if (viewMode === "list") return filteredEvents;
+    return monthEvents;
+  }, [filteredEvents, monthEvents, viewMode]);
 
   const toggleFilter = (tag: string) => {
     setActiveFilters(prev =>
@@ -188,14 +341,35 @@ const EventsSection = () => {
     );
   };
 
-  const calendarDays = getCalendarDays(2026, 2); // March 2026
+  const calendarDays = getCalendarDays(currentCalMonth.year, currentCalMonth.month);
   const today = new Date();
   const isToday = (day: number) =>
-    today.getFullYear() === 2026 && today.getMonth() === 2 && today.getDate() === day;
+    today.getFullYear() === currentCalMonth.year && today.getMonth() === currentCalMonth.month && today.getDate() === day;
 
   const selectedDayEvents = selectedCalendarDay
-    ? getEventsForDay(selectedCalendarDay, 2, 2026, filteredEvents)
+    ? getEventsForDay(selectedCalendarDay, currentCalMonth.month, currentCalMonth.year, filteredEvents)
     : [];
+
+  const handleSetReminder = useCallback(async (event: GameEvent) => {
+    if (reminders[event.name]) {
+      setReminders(prev => cancelReminder(event.name, prev));
+      return;
+    }
+    const granted = await requestNotificationPermission();
+    if (!granted) {
+      alert("Please allow notifications in your browser settings to set event reminders.");
+      return;
+    }
+    setReminders(prev => scheduleNotification(event, prev));
+  }, [reminders]);
+
+  const switchMonth = (dir: -1 | 1) => {
+    const next = calMonthIdx + dir;
+    if (next >= 0 && next < AVAILABLE_MONTHS.length) {
+      setCalMonthIdx(next);
+      setSelectedCalendarDay(null);
+    }
+  };
 
   return (
     <section id="events" className="py-20 bg-background">
@@ -207,8 +381,8 @@ const EventsSection = () => {
           viewport={{ once: true }}
           className="mb-8"
         >
-          <h2 className="text-3xl md:text-4xl font-display text-gradient-gold mb-2">March 2026 Events</h2>
-          <p className="text-muted-foreground font-body">Tap any event to see full details</p>
+          <h2 className="text-3xl md:text-4xl font-display text-gradient-gold mb-2">Pokémon GO Events</h2>
+          <p className="text-muted-foreground font-body">Tap any event to see full details · Set reminders with 🔔</p>
         </motion.div>
 
         {/* Countdown Hero */}
@@ -221,14 +395,13 @@ const EventsSection = () => {
           <CountdownTimer targetDate={nextEvent.end} label={`⏳ ${nextEvent.name} ends in`} />
         </motion.div>
 
-        {/* Controls: View toggle + Filters */}
+        {/* Controls */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="mb-6 flex flex-col sm:flex-row sm:items-center gap-4"
         >
-          {/* View toggle */}
           <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/60 border border-border w-fit">
             <button
               onClick={() => setViewMode("list")}
@@ -248,7 +421,6 @@ const EventsSection = () => {
             </button>
           </div>
 
-          {/* Tag filters */}
           <div className="flex items-center gap-2 flex-wrap">
             <Filter className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
             {allTags.map(tag => {
@@ -290,6 +462,7 @@ const EventsSection = () => {
                   const globalIndex = events.indexOf(event);
                   const isLive = event.tag === "Live" && event.end > new Date();
                   const isExpanded = expandedIndex === globalIndex;
+                  const hasReminder = !!reminders[event.name];
                   return (
                     <motion.div
                       key={globalIndex}
@@ -310,7 +483,16 @@ const EventsSection = () => {
                           <p className="font-body font-semibold text-foreground truncate">{event.name}</p>
                           <p className="text-sm text-muted-foreground font-body">{event.date}</p>
                         </div>
-                        <div className="flex items-center gap-3 shrink-0">
+                        <div className="flex items-center gap-2 shrink-0">
+                          {notifSupported && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleSetReminder(event); }}
+                              className={`p-1.5 rounded-lg transition-colors cursor-pointer ${hasReminder ? "bg-primary/15 text-primary" : "hover:bg-muted text-muted-foreground"}`}
+                              title={hasReminder ? "Cancel reminder" : "Set reminder (30 min before)"}
+                            >
+                              {hasReminder ? <BellRing className="w-3.5 h-3.5" /> : <Bell className="w-3.5 h-3.5" />}
+                            </button>
+                          )}
                           <CountdownTimer targetDate={event.end} label="" inline />
                           <span className={`px-3 py-1 rounded-full text-xs font-body font-medium ${event.tagColor} hidden sm:inline-flex items-center`}>
                             {isLive && <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary mr-1.5 animate-pulse-glow" />}
@@ -329,21 +511,36 @@ const EventsSection = () => {
             ) : (
               /* Calendar View */
               <div className="rounded-2xl bg-card-gradient border border-border shadow-card overflow-hidden">
-                <div className="p-4 border-b border-border">
-                  <h3 className="font-display text-foreground text-lg">March 2026</h3>
+                {/* Month header with navigation */}
+                <div className="p-4 border-b border-border flex items-center justify-between">
+                  <button
+                    onClick={() => switchMonth(-1)}
+                    disabled={calMonthIdx === 0}
+                    className="p-1.5 rounded-lg hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    <ChevronLeft className="w-5 h-5 text-foreground" />
+                  </button>
+                  <h3 className="font-display text-foreground text-lg">
+                    {MONTH_NAMES[currentCalMonth.month]} {currentCalMonth.year}
+                  </h3>
+                  <button
+                    onClick={() => switchMonth(1)}
+                    disabled={calMonthIdx === AVAILABLE_MONTHS.length - 1}
+                    className="p-1.5 rounded-lg hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    <ChevronRight className="w-5 h-5 text-foreground" />
+                  </button>
                 </div>
                 <div className="p-4">
-                  {/* Day headers */}
                   <div className="grid grid-cols-7 gap-1 mb-2">
                     {DAYS_OF_WEEK.map(d => (
                       <div key={d} className="text-center text-xs font-body font-semibold text-muted-foreground py-1">{d}</div>
                     ))}
                   </div>
-                  {/* Day cells */}
                   <div className="grid grid-cols-7 gap-1">
                     {calendarDays.map((day, idx) => {
                       if (day === null) return <div key={`empty-${idx}`} />;
-                      const dayEvents = getEventsForDay(day, 2, 2026, filteredEvents);
+                      const dayEvents = getEventsForDay(day, currentCalMonth.month, currentCalMonth.year, filteredEvents);
                       const hasEvents = dayEvents.length > 0;
                       const isSelected = selectedCalendarDay === day;
                       return (
@@ -387,7 +584,7 @@ const EventsSection = () => {
                     >
                       <div className="p-4">
                         <p className="text-xs font-body font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                          March {selectedCalendarDay}, 2026
+                          {MONTH_NAMES[currentCalMonth.month]} {selectedCalendarDay}, {currentCalMonth.year}
                         </p>
                         {selectedDayEvents.length === 0 ? (
                           <p className="text-sm text-muted-foreground font-body">No events on this day</p>
@@ -396,6 +593,7 @@ const EventsSection = () => {
                             {selectedDayEvents.map((event, i) => {
                               const globalIndex = events.indexOf(event);
                               const isExpanded = expandedIndex === globalIndex;
+                              const hasReminder = !!reminders[event.name];
                               return (
                                 <div key={i} className="rounded-xl bg-muted/30 border border-border overflow-hidden">
                                   <button
@@ -407,6 +605,15 @@ const EventsSection = () => {
                                       <p className="font-body font-semibold text-foreground text-sm truncate">{event.name}</p>
                                       <p className="text-xs text-muted-foreground font-body">{event.date}</p>
                                     </div>
+                                    {notifSupported && (
+                                      <button
+                                        onClick={(e) => { e.stopPropagation(); handleSetReminder(event); }}
+                                        className={`p-1 rounded-lg transition-colors cursor-pointer ${hasReminder ? "bg-primary/15 text-primary" : "hover:bg-muted text-muted-foreground"}`}
+                                        title={hasReminder ? "Cancel reminder" : "Set reminder"}
+                                      >
+                                        {hasReminder ? <BellRing className="w-3 h-3" /> : <Bell className="w-3 h-3" />}
+                                      </button>
+                                    )}
                                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-body font-medium ${event.tagColor} shrink-0`}>
                                       {event.tag}
                                     </span>
@@ -456,7 +663,6 @@ const EventsSection = () => {
                     { label: "Community Day", color: "bg-accent" },
                     { label: "Research", color: "bg-legendary" },
                     { label: "Battle", color: "bg-accent" },
-                    { label: "Upcoming", color: "bg-muted-foreground" },
                   ].map(l => (
                     <div key={l.label} className="flex items-center gap-2">
                       <span className={`w-2.5 h-2.5 rounded-full ${l.color}`} />
@@ -464,6 +670,33 @@ const EventsSection = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Notification info */}
+            {notifSupported && (
+              <div className="p-4 rounded-2xl bg-card border border-border shadow-card">
+                <p className="text-xs font-body font-semibold text-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                  <Bell className="w-3.5 h-3.5 text-primary" /> Reminders
+                </p>
+                <p className="text-xs text-muted-foreground font-body">
+                  Tap 🔔 on any event to get a browser notification 30 minutes before it starts. Keep this tab open for reminders to work.
+                </p>
+                {Object.keys(reminders).length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {Object.keys(reminders).map(name => (
+                      <div key={name} className="flex items-center justify-between text-xs font-body">
+                        <span className="text-foreground truncate">{name}</span>
+                        <button
+                          onClick={() => setReminders(prev => cancelReminder(name, prev))}
+                          className="text-muted-foreground hover:text-destructive cursor-pointer ml-2 shrink-0"
+                        >
+                          <BellOff className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
