@@ -9,12 +9,52 @@ const CODE_SOURCES = [
   { url: 'https://www.pockettactics.com/pokemon-go/codes', name: 'PocketTactics' },
 ];
 
+// In-memory rate limiting: max 1 request per 60 seconds per IP
+const rateLimitMap = new Map<string, number>();
+const RATE_LIMIT_WINDOW_MS = 60_000;
+
+// Cache last successful response for 5 minutes
+let cachedResponse: { data: string; timestamp: number } | null = null;
+const CACHE_TTL_MS = 5 * 60_000;
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Rate limiting by IP
+    const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+                     req.headers.get('cf-connecting-ip') || 'unknown';
+    const now = Date.now();
+    const lastRequest = rateLimitMap.get(clientIp);
+    if (lastRequest && now - lastRequest < RATE_LIMIT_WINDOW_MS) {
+      // Return cached data if available during rate limit
+      if (cachedResponse && now - cachedResponse.timestamp < CACHE_TTL_MS) {
+        return new Response(cachedResponse.data, {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      return new Response(
+        JSON.stringify({ success: false, error: 'Rate limit exceeded. Please try again later.' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    rateLimitMap.set(clientIp, now);
+
+    // Clean up old entries periodically
+    if (rateLimitMap.size > 1000) {
+      for (const [ip, ts] of rateLimitMap) {
+        if (now - ts > RATE_LIMIT_WINDOW_MS) rateLimitMap.delete(ip);
+      }
+    }
+
+    // Return cached response if still fresh
+    if (cachedResponse && now - cachedResponse.timestamp < CACHE_TTL_MS) {
+      return new Response(cachedResponse.data, {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
     if (!apiKey) {
       return new Response(
@@ -72,14 +112,17 @@ Deno.serve(async (req) => {
 
     console.log(`Found ${uniqueCodes.length} unique codes`);
 
+    const responseBody = JSON.stringify({ success: true, codes: uniqueCodes, scrapedAt: new Date().toISOString() });
+    cachedResponse = { data: responseBody, timestamp: Date.now() };
+
     return new Response(
-      JSON.stringify({ success: true, codes: uniqueCodes, scrapedAt: new Date().toISOString() }),
+      responseBody,
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
     console.error('Error in scrape-promo-codes:', error);
     return new Response(
-      JSON.stringify({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }),
+      JSON.stringify({ success: false, error: 'An internal error occurred. Please try again later.' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
