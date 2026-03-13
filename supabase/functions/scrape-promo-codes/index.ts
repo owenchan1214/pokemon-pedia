@@ -147,7 +147,9 @@ function extractCodes(markdown: string, source: string): { code: string; reward:
       
       // Try to find reward description nearby
       const context = lines.slice(Math.max(0, i - 2), i + 3).join(' ');
-      const isExpired = /expired|inactive|no longer|invalid/i.test(context);
+      
+      // Check expiration - look for date patterns and expired keywords
+      const isExpired = checkIfExpired(context);
       
       // Extract reward from context
       let reward = 'Promo reward';
@@ -167,4 +169,26 @@ function extractCodes(markdown: string, source: string): { code: string; reward:
   }
   
   return codes;
+}
+
+function checkIfExpired(context: string): boolean {
+  // Explicit expired keywords
+  if (/expired|inactive|no longer|invalid|has ended|not working/i.test(context)) {
+    return true;
+  }
+
+  // Check for past dates like "Expired Mar 1", "expires January 15, 2025"
+  const dateMatch = context.match(/(?:expire[sd]?|valid until|ends?)\s+(\w+\s+\d{1,2}(?:,?\s*\d{4})?)/i);
+  if (dateMatch) {
+    try {
+      const parsed = new Date(dateMatch[1]);
+      if (!isNaN(parsed.getTime()) && parsed < new Date()) {
+        return true;
+      }
+    } catch {
+      // ignore parse errors
+    }
+  }
+
+  return false;
 }
