@@ -14,7 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      promo_codes: {
+        Row: {
+          active: boolean
+          code: string
+          expires: string | null
+          id: string
+          reward: string
+          scraped_at: string
+          source: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          expires?: string | null
+          id?: string
+          reward?: string
+          scraped_at?: string
+          source?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          expires?: string | null
+          id?: string
+          reward?: string
+          scraped_at?: string
+          source?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
