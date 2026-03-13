@@ -13,11 +13,11 @@ type PromoCode = {
 };
 
 const defaultCodes: PromoCode[] = [
-  { code: "FENDIxFRGMTxPOKEMON", reward: "FENDI × FRGMT × POKÉMON hoodie (avatar item)", expires: "Active", active: true },
+  { code: "FENDIxFRGMTxPOKEMON", reward: "FENDI × FRGMT × POKÉMON avatar hoodie", expires: "Active (no expiry)", active: true },
   { code: "LRQEV2VZ59UDA", reward: "Verizon outfit (mask, jacket, backpack)", expires: "Long-lived", active: true },
+  { code: "GOTOURKALOS", reward: "GO Tour: Kalos starter Timed Research", expires: "Expired Mar 2", active: false },
   { code: "QFWM3SRJPVRY5", reward: "Timed Research for Unown X", expires: "Expired Mar 1", active: false },
   { code: "2PKXPAT2RJXKL", reward: "Timed Research for Unown Y", expires: "Expired Mar 1", active: false },
-  { code: "GOTOURKALOS", reward: "GO Tour: Kalos starter Timed Research", expires: "Expired Mar 2", active: false },
   { code: "TH4NKY0UF41RYMUCH", reward: "Very Fairy Timed Research (Sylveon)", expires: "Expired Mar 1", active: false },
   { code: "6K343X373BDQM", reward: "Timed Research for Unown Y / ZA", expires: "Expired", active: false },
 ];
