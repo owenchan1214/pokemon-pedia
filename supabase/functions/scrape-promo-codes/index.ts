@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Error in scrape-promo-codes:', error);
     return new Response(
-      JSON.stringify({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }),
+      JSON.stringify({ success: false, error: 'An internal error occurred. Please try again later.' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
