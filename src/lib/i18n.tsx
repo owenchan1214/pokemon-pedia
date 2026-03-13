@@ -78,6 +78,8 @@ const translations: Record<Language, Record<string, string>> = {
     "codes.no_new": "No se encontraron códigos nuevos",
     "codes.found": "códigos encontrados",
     "codes.last_scan": "Último escaneo",
+    "codes.auto_updated": "Actualizado automáticamente cada 2 días",
+    "codes.loading": "Cargando códigos...",
   },
   fr: {
     "nav.events": "Événements",
