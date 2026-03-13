@@ -112,8 +112,11 @@ Deno.serve(async (req) => {
 
     console.log(`Found ${uniqueCodes.length} unique codes`);
 
+    const responseBody = JSON.stringify({ success: true, codes: uniqueCodes, scrapedAt: new Date().toISOString() });
+    cachedResponse = { data: responseBody, timestamp: Date.now() };
+
     return new Response(
-      JSON.stringify({ success: true, codes: uniqueCodes, scrapedAt: new Date().toISOString() }),
+      responseBody,
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
