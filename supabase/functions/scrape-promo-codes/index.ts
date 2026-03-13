@@ -6,7 +6,6 @@ const corsHeaders = {
 const CODE_SOURCES = [
   { url: 'https://leekduck.com/pokemongo-promo-codes/', name: 'LeekDuck' },
   { url: 'https://www.eurogamer.net/pokemon-go-promo-codes-list', name: 'Eurogamer' },
-  { url: 'https://www.pockettactics.com/pokemon-go/codes', name: 'PocketTactics' },
 ];
 
 // In-memory rate limiting: max 1 request per 60 seconds per IP
