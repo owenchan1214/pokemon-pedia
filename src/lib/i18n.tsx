@@ -43,6 +43,8 @@ const translations: Record<Language, Record<string, string>> = {
     "codes.no_new": "No new codes found",
     "codes.found": "codes found",
     "codes.last_scan": "Last scan",
+    "codes.auto_updated": "Auto-updated every 2 days",
+    "codes.loading": "Loading codes...",
   },
   es: {
     "nav.events": "Eventos",
@@ -76,6 +78,8 @@ const translations: Record<Language, Record<string, string>> = {
     "codes.no_new": "No se encontraron códigos nuevos",
     "codes.found": "códigos encontrados",
     "codes.last_scan": "Último escaneo",
+    "codes.auto_updated": "Actualizado automáticamente cada 2 días",
+    "codes.loading": "Cargando códigos...",
   },
   fr: {
     "nav.events": "Événements",
@@ -109,6 +113,8 @@ const translations: Record<Language, Record<string, string>> = {
     "codes.no_new": "Aucun nouveau code trouvé",
     "codes.found": "codes trouvés",
     "codes.last_scan": "Dernier scan",
+    "codes.auto_updated": "Mis à jour automatiquement tous les 2 jours",
+    "codes.loading": "Chargement des codes...",
   },
   de: {
     "nav.events": "Events",
@@ -142,6 +148,8 @@ const translations: Record<Language, Record<string, string>> = {
     "codes.no_new": "Keine neuen Codes gefunden",
     "codes.found": "Codes gefunden",
     "codes.last_scan": "Letzter Scan",
+    "codes.auto_updated": "Alle 2 Tage automatisch aktualisiert",
+    "codes.loading": "Codes werden geladen...",
   },
   ja: {
     "nav.events": "イベント",
@@ -175,6 +183,8 @@ const translations: Record<Language, Record<string, string>> = {
     "codes.no_new": "新しいコードは見つかりませんでした",
     "codes.found": "件のコードが見つかりました",
     "codes.last_scan": "最終スキャン",
+    "codes.auto_updated": "2日ごとに自動更新",
+    "codes.loading": "コードを読み込み中...",
   },
 };
 
