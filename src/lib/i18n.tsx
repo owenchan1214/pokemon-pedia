@@ -183,6 +183,8 @@ const translations: Record<Language, Record<string, string>> = {
     "codes.no_new": "新しいコードは見つかりませんでした",
     "codes.found": "件のコードが見つかりました",
     "codes.last_scan": "最終スキャン",
+    "codes.auto_updated": "2日ごとに自動更新",
+    "codes.loading": "コードを読み込み中...",
   },
 };
 
