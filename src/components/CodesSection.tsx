@@ -1,6 +1,6 @@
-import { motion, AnimatePresence } from "framer-motion";
-import { Copy, Check, Gift, AlertTriangle, RefreshCw, Loader2, ExternalLink } from "lucide-react";
-import { useState, useCallback } from "react";
+import { motion } from "framer-motion";
+import { Copy, Check, Gift, AlertTriangle, ExternalLink } from "lucide-react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 
@@ -12,68 +12,48 @@ type PromoCode = {
   source?: string;
 };
 
-const defaultCodes: PromoCode[] = [
-  { code: "FENDIxFRGMTxPOKEMON", reward: "FENDI × FRGMT × POKÉMON avatar hoodie", expires: "Active (no expiry)", active: true },
-  { code: "LRQEV2VZ59UDA", reward: "Verizon outfit (mask, jacket, backpack)", expires: "Long-lived", active: true },
-  { code: "GOTOURKALOS", reward: "GO Tour: Kalos starter Timed Research", expires: "Expired Mar 2", active: false },
-  { code: "QFWM3SRJPVRY5", reward: "Timed Research for Unown X", expires: "Expired Mar 1", active: false },
-  { code: "2PKXPAT2RJXKL", reward: "Timed Research for Unown Y", expires: "Expired Mar 1", active: false },
-  { code: "TH4NKY0UF41RYMUCH", reward: "Very Fairy Timed Research (Sylveon)", expires: "Expired Mar 1", active: false },
-  { code: "6K343X373BDQM", reward: "Timed Research for Unown Y / ZA", expires: "Expired", active: false },
-];
-
 const CodesSection = () => {
   const { t } = useI18n();
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-  const [codes, setCodes] = useState<PromoCode[]>(defaultCodes);
-  const [isFetching, setIsFetching] = useState(false);
-  const [lastScan, setLastScan] = useState<string | null>(null);
-  const [scanResult, setScanResult] = useState<string | null>(null);
+  const [codes, setCodes] = useState<PromoCode[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadCodes();
+  }, []);
+
+  const loadCodes = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('promo_codes')
+        .select('code, reward, source, active, expires, updated_at')
+        .order('active', { ascending: false })
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        setCodes(data.map((c: any) => ({
+          code: c.code,
+          reward: c.reward || 'Promo reward',
+          expires: c.expires || (c.active ? 'Active' : 'Expired'),
+          active: c.active,
+          source: c.source,
+        })));
+      }
+    } catch (err) {
+      console.error('Error loading codes:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleCopy = (code: string, index: number) => {
     navigator.clipboard.writeText(code);
     setCopiedIndex(index);
     setTimeout(() => setCopiedIndex(null), 2000);
   };
-
-  const handleAutoFetch = useCallback(async () => {
-    setIsFetching(true);
-    setScanResult(null);
-    try {
-      const { data, error } = await supabase.functions.invoke("scrape-promo-codes");
-      if (error) throw error;
-
-      if (data?.success && data.codes?.length > 0) {
-        const scrapedCodes: PromoCode[] = data.codes.map((c: any) => ({
-          code: c.code,
-          reward: c.reward || "Promo reward",
-          expires: c.active ? "Active" : "Expired",
-          active: c.active,
-          source: c.source,
-        }));
-
-        // Merge: keep existing + add new ones
-        const existingKeys = new Set(codes.map((c) => c.code.toUpperCase()));
-        const newCodes = scrapedCodes.filter((c) => !existingKeys.has(c.code.toUpperCase()));
-
-        if (newCodes.length > 0) {
-          setCodes((prev) => [...newCodes, ...prev]);
-          setScanResult(`${newCodes.length} ${t("codes.found")}`);
-        } else {
-          setScanResult(t("codes.no_new"));
-        }
-        setLastScan(new Date().toLocaleTimeString());
-      } else {
-        setScanResult(t("codes.no_new"));
-        setLastScan(new Date().toLocaleTimeString());
-      }
-    } catch (err) {
-      console.error("Auto-fetch error:", err);
-      setScanResult("Error fetching codes");
-    } finally {
-      setIsFetching(false);
-    }
-  }, [codes, t]);
 
   const activeCodes = codes.filter((c) => c.active);
   const expiredCodes = codes.filter((c) => !c.active);
@@ -85,51 +65,15 @@ const CodesSection = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mb-12 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4"
+          className="mb-12"
         >
-          <div>
-            <h2 className="text-3xl md:text-4xl font-display text-gradient-gold mb-2">{t("codes.title")}</h2>
-            <p className="text-muted-foreground font-body">{t("codes.subtitle")} · Updated March 2026</p>
-          </div>
-          <div className="flex items-center gap-3">
-            {lastScan && (
-              <span className="text-xs text-muted-foreground font-body">
-                {t("codes.last_scan")}: {lastScan}
-              </span>
-            )}
-            <button
-              onClick={handleAutoFetch}
-              disabled={isFetching}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/10 hover:bg-primary/20 border border-primary/25 text-primary text-sm font-body font-semibold transition-colors disabled:opacity-50 cursor-pointer"
-            >
-              {isFetching ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  {t("codes.fetching")}
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="w-4 h-4" />
-                  {t("codes.fetch")}
-                </>
-              )}
-            </button>
-          </div>
+          <h2 className="text-3xl md:text-4xl font-display text-gradient-gold mb-2">{t("codes.title")}</h2>
+          <p className="text-muted-foreground font-body">{t("codes.subtitle")} · {t("codes.auto_updated")}</p>
         </motion.div>
 
-        {/* Scan result feedback */}
-        <AnimatePresence>
-          {scanResult && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mb-6 p-3 rounded-xl bg-primary/10 border border-primary/25 text-sm font-body text-primary max-w-5xl"
-            >
-              {scanResult}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {isLoading && (
+          <div className="mb-6 text-sm text-muted-foreground font-body">{t("codes.loading") || "Loading codes..."}</div>
+        )}
 
         {/* Active codes */}
         {activeCodes.length > 0 && (

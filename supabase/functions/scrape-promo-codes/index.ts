@@ -5,15 +5,11 @@ const corsHeaders = {
 
 const CODE_SOURCES = [
   { url: 'https://www.dexerto.com/pokemon/pokemon-go-promo-codes-free-items-1350276/', name: 'Dexerto' },
+  { url: 'https://www.pockettactics.com/pokemon-go/codes', name: 'PocketTactics' },
+  { url: 'https://www.codesofexisting.com/pokemon-go-promo-codes/', name: 'CodesOfExisting' },
 ];
 
-// In-memory rate limiting: max 1 request per 60 seconds per IP
-const rateLimitMap = new Map<string, number>();
-const RATE_LIMIT_WINDOW_MS = 60_000;
-
-// Cache last successful response for 5 minutes
-let cachedResponse: { data: string; timestamp: number } | null = null;
-const CACHE_TTL_MS = 5 * 60_000;
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -21,38 +17,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Rate limiting by IP
-    const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-                     req.headers.get('cf-connecting-ip') || 'unknown';
-    const now = Date.now();
-    const lastRequest = rateLimitMap.get(clientIp);
-    if (lastRequest && now - lastRequest < RATE_LIMIT_WINDOW_MS) {
-      if (cachedResponse && now - cachedResponse.timestamp < CACHE_TTL_MS) {
-        return new Response(cachedResponse.data, {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      return new Response(
-        JSON.stringify({ success: false, error: 'Rate limit exceeded. Please try again later.' }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-    rateLimitMap.set(clientIp, now);
-
-    // Clean up old entries
-    if (rateLimitMap.size > 1000) {
-      for (const [ip, ts] of rateLimitMap) {
-        if (now - ts > RATE_LIMIT_WINDOW_MS) rateLimitMap.delete(ip);
-      }
-    }
-
-    // Return cached response if still fresh
-    if (cachedResponse && now - cachedResponse.timestamp < CACHE_TTL_MS) {
-      return new Response(cachedResponse.data, {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
     const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
     if (!apiKey) {
       return new Response(
@@ -61,8 +25,13 @@ Deno.serve(async (req) => {
       );
     }
 
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
     const allCodes: { code: string; reward: string; source: string; active: boolean }[] = [];
 
+    // Scrape each source in parallel
     const scrapePromises = CODE_SOURCES.map(async (source) => {
       try {
         console.log(`Scraping ${source.name}: ${source.url}`);
@@ -108,10 +77,45 @@ Deno.serve(async (req) => {
       return true;
     });
 
-    console.log(`Found ${uniqueCodes.length} unique codes`);
+    console.log(`Found ${uniqueCodes.length} unique codes from scraping`);
 
-    const responseBody = JSON.stringify({ success: true, codes: uniqueCodes, scrapedAt: new Date().toISOString() });
-    cachedResponse = { data: responseBody, timestamp: Date.now() };
+    // Persist to database
+    if (uniqueCodes.length > 0) {
+      for (const c of uniqueCodes) {
+        const { error } = await supabase.from('promo_codes').upsert(
+          {
+            code: c.code,
+            reward: c.reward,
+            source: c.source,
+            active: c.active,
+            expires: c.active ? 'Active' : 'Expired',
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'code' }
+        );
+        if (error) console.error(`Failed to upsert code ${c.code}:`, error);
+      }
+    }
+
+    // Also mark codes as expired if scraped sources now say so
+    const { data: existingCodes } = await supabase.from('promo_codes').select('code, active');
+    if (existingCodes) {
+      const scrapedActiveSet = new Set(uniqueCodes.filter(c => c.active).map(c => c.code.toUpperCase()));
+      const scrapedExpiredSet = new Set(uniqueCodes.filter(c => !c.active).map(c => c.code.toUpperCase()));
+
+      for (const existing of existingCodes) {
+        // If a code was found as expired in scrape, mark it expired
+        if (existing.active && scrapedExpiredSet.has(existing.code.toUpperCase())) {
+          await supabase.from('promo_codes').update({
+            active: false,
+            expires: 'Expired',
+            updated_at: new Date().toISOString(),
+          }).eq('code', existing.code);
+        }
+      }
+    }
+
+    const responseBody = JSON.stringify({ success: true, codesFound: uniqueCodes.length, scrapedAt: new Date().toISOString() });
 
     return new Response(responseBody, {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -128,40 +132,49 @@ Deno.serve(async (req) => {
 function extractCodes(markdown: string, source: string): { code: string; reward: string; source: string; active: boolean }[] {
   const codes: { code: string; reward: string; source: string; active: boolean }[] = [];
 
-  // Strategy 1: Parse markdown tables (e.g. "| **CODE** | Reward | Expires |")
+  // Strategy 1: Parse markdown tables
   const tableRowRegex = /\|\s*\*{0,2}([A-Za-z0-9]{6,30})\*{0,2}\s*\|\s*(.+?)\s*\|\s*(.+?)\s*\|/g;
   let match;
   while ((match = tableRowRegex.exec(markdown)) !== null) {
     const code = match[1].trim();
     const reward = match[2].replace(/\*{1,2}/g, '').trim();
     const expiryInfo = match[3].replace(/\*{1,2}/g, '').trim();
-
-    // Skip table headers
     if (/^(code|---)/i.test(code)) continue;
     if (code.length < 6) continue;
-
     const isExpired = checkIfExpired(expiryInfo);
     codes.push({ code, reward, source, active: !isExpired });
   }
 
-  // Strategy 2: Look for codes in context with surrounding text
-  const lines = markdown.split('\n');
-  const codePattern = /\b([A-Z0-9]{8,30})\b/g;
+  // Strategy 2: Inline code blocks with context (e.g. "Promo Code: `CODE`" or "**`CODE`**")
+  const inlineCodeRegex = /(?:promo\s*code|code)[:\s]*[`*]*([A-Z0-9]{8,30})[`*]*/gi;
   const existingCodes = new Set(codes.map(c => c.code.toUpperCase()));
+  while ((match = inlineCodeRegex.exec(markdown)) !== null) {
+    const code = match[1].trim();
+    if (existingCodes.has(code.toUpperCase())) continue;
+    existingCodes.add(code.toUpperCase());
 
-  // Track whether we're in an "active" or "expired" section
+    // Get surrounding context for reward
+    const start = Math.max(0, match.index - 200);
+    const end = Math.min(markdown.length, match.index + 200);
+    const context = markdown.substring(start, end);
+    const isExpired = checkIfExpired(context);
+
+    let reward = 'Promo reward';
+    const rewardMatch = context.match(/(?:get|receive|gives?|provides?|reward)[:\s]+([^.!\n|`]{5,80})/i);
+    if (rewardMatch) reward = rewardMatch[1].replace(/\*{1,2}/g, '').trim();
+
+    codes.push({ code, reward, source, active: !isExpired });
+  }
+
+  // Strategy 3: Standalone all-caps codes
+  const lines = markdown.split('\n');
   let inExpiredSection = false;
+  const codePattern = /\b([A-Z0-9]{8,30})\b/g;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-
-    // Detect section headers
-    if (/#{1,3}\s*.*(expired|old|past|previous|invalid)/i.test(line)) {
-      inExpiredSection = true;
-    }
-    if (/#{1,3}\s*.*(active|current|working|new|available)/i.test(line)) {
-      inExpiredSection = false;
-    }
+    if (/#{1,3}\s*.*(expired|old|past|previous|invalid)/i.test(line)) inExpiredSection = true;
+    if (/#{1,3}\s*.*(active|current|working|new|available)/i.test(line)) inExpiredSection = false;
 
     const matches = line.match(codePattern);
     if (!matches) continue;
@@ -171,21 +184,17 @@ function extractCodes(markdown: string, source: string): { code: string; reward:
       if (code.length < 8 || code.length > 25) continue;
       if (/^[0-9]+$/.test(code)) continue;
       if (/^[A-Z]+$/.test(code) && code.length < 10) continue;
-      // Filter common false positives (headers, IDs, etc.)
-      if (/^(UPDATED|POKEMON|MARCH|APRIL|FEBRUARY|JANUARY|IMAGE|TABLE|GUIDE)/i.test(code)) continue;
+      if (/^(UPDATED|POKEMON|MARCH|APRIL|FEBRUARY|JANUARY|IMAGE|TABLE|GUIDE|NIANTIC|DEXERTO)/i.test(code)) continue;
 
       const context = lines.slice(Math.max(0, i - 2), i + 3).join(' ');
       const isExpired = inExpiredSection || checkIfExpired(context);
 
       let reward = 'Promo reward';
       const rewardMatch = context.match(/(?:reward|get|receive|claim|redeem|gives?|provides?)[:\s]+([^.!\n|]{5,80})/i);
-      if (rewardMatch) {
-        reward = rewardMatch[1].trim();
-      } else {
+      if (rewardMatch) reward = rewardMatch[1].replace(/\*{1,2}/g, '').trim();
+      else {
         const cleanLine = line.replace(code, '').replace(/[|*`#\-]/g, '').trim();
-        if (cleanLine.length > 5 && cleanLine.length < 100) {
-          reward = cleanLine;
-        }
+        if (cleanLine.length > 5 && cleanLine.length < 100) reward = cleanLine;
       }
 
       existingCodes.add(code.toUpperCase());
@@ -197,22 +206,13 @@ function extractCodes(markdown: string, source: string): { code: string; reward:
 }
 
 function checkIfExpired(context: string): boolean {
-  if (/expired|inactive|no longer|invalid|has ended|not working/i.test(context)) {
-    return true;
-  }
-
-  // Check for past dates
+  if (/expired|inactive|no longer|invalid|has ended|not working/i.test(context)) return true;
   const dateMatch = context.match(/(?:expire[sd]?|valid until|ends?|ended)\s+(?:on\s+)?(\w+\.?\s+\d{1,2}(?:,?\s*\d{4})?)/i);
   if (dateMatch) {
     try {
       const parsed = new Date(dateMatch[1]);
-      if (!isNaN(parsed.getTime()) && parsed < new Date()) {
-        return true;
-      }
-    } catch {
-      // ignore
-    }
+      if (!isNaN(parsed.getTime()) && parsed < new Date()) return true;
+    } catch { /* ignore */ }
   }
-
   return false;
 }
