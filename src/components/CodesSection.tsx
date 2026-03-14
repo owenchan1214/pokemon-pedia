@@ -75,6 +75,12 @@ const CodesSection = () => {
         >
           <h2 className="text-3xl md:text-4xl font-display text-gradient-gold mb-2">{t("codes.title")}</h2>
           <p className="text-muted-foreground font-body">{t("codes.subtitle")} · {t("codes.auto_updated")}</p>
+          {lastUpdated && (
+            <p className="text-xs text-muted-foreground/70 font-body mt-1 flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              {t("codes.last_updated")}: {new Date(lastUpdated).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+            </p>
+          )}
         </motion.div>
 
         {isLoading && (
