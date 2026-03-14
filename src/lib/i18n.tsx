@@ -189,6 +189,7 @@ const translations: Record<Language, Record<string, string>> = {
     "codes.last_scan": "最終スキャン",
     "codes.auto_updated": "2日ごとに自動更新",
     "codes.loading": "コードを読み込み中...",
+    "codes.last_updated": "最終更新",
   },
 };
 
