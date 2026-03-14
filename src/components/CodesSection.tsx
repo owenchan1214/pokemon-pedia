@@ -35,6 +35,11 @@ const CodesSection = () => {
       if (error) throw error;
 
       if (data && data.length > 0) {
+        // Find the most recent updated_at
+        const mostRecent = data.reduce((latest: string, c: any) => 
+          c.updated_at > latest ? c.updated_at : latest, data[0].updated_at);
+        setLastUpdated(mostRecent);
+
         setCodes(data.map((c: any) => ({
           code: c.code,
           reward: c.reward || 'Promo reward',
