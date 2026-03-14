@@ -94,7 +94,7 @@ Deno.serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You extract Pokemon GO promo codes from website content. Today's date is ${today}. Return ONLY a JSON array of objects with: code (string), reward (string, brief description of what you get), active (boolean - true only if the code is currently working and not expired as of today), source (string - which source website it came from). Be strict: only include actual promo codes (alphanumeric strings typically 8-20 chars that can be redeemed in Pokemon GO). Do NOT include: page navigation text, website names, random words, user comments, or anything that is clearly not a real Pokemon GO promo code. If a code has expired or the article says it expired, mark active as false. Return raw JSON array only, no markdown fences.`
+            content: `You extract Pokemon GO promo codes from website content. Today's date is ${today}. Return ONLY a JSON array of objects with: code (string), reward (string, brief description of what you get), active (boolean - true only if the code is currently working and not expired as of today), source (string - which source website it came from). Include BOTH active and expired/old codes you find - mark expired ones with active: false. Be strict: only include actual promo codes (alphanumeric strings that can be redeemed in Pokemon GO). Do NOT include: page navigation text, website names, random words, user comments, or anything that is clearly not a real Pokemon GO promo code. Return raw JSON array only, no markdown fences.`
           },
           {
             role: 'user',
