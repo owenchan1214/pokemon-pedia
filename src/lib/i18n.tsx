@@ -153,6 +153,7 @@ const translations: Record<Language, Record<string, string>> = {
     "codes.last_scan": "Letzter Scan",
     "codes.auto_updated": "Alle 2 Tage automatisch aktualisiert",
     "codes.loading": "Codes werden geladen...",
+    "codes.last_updated": "Zuletzt aktualisiert",
   },
   ja: {
     "nav.events": "イベント",
