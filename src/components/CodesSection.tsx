@@ -17,6 +17,7 @@ const CodesSection = () => {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [codes, setCodes] = useState<PromoCode[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
   useEffect(() => {
     loadCodes();
