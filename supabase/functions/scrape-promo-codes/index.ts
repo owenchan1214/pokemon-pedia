@@ -6,7 +6,6 @@ const corsHeaders = {
 const CODE_SOURCES = [
   { url: 'https://www.dexerto.com/pokemon/pokemon-go-promo-codes-free-items-1350276/', name: 'Dexerto' },
   { url: 'https://www.pockettactics.com/pokemon-go/codes', name: 'PocketTactics' },
-  { url: 'https://www.codesofexisting.com/pokemon-go-promo-codes/', name: 'CodesOfExisting' },
 ];
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -17,10 +16,18 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
-    if (!apiKey) {
+    const firecrawlKey = Deno.env.get('FIRECRAWL_API_KEY');
+    if (!firecrawlKey) {
       return new Response(
         JSON.stringify({ success: false, error: 'FIRECRAWL_API_KEY not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
+    if (!lovableApiKey) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'LOVABLE_API_KEY not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -29,8 +36,6 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const allCodes: { code: string; reward: string; source: string; active: boolean }[] = [];
-
     // Scrape each source in parallel
     const scrapePromises = CODE_SOURCES.map(async (source) => {
       try {
@@ -38,7 +43,7 @@ Deno.serve(async (req) => {
         const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${apiKey}`,
+            'Authorization': `Bearer ${firecrawlKey}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
@@ -51,176 +56,135 @@ Deno.serve(async (req) => {
         const data = await response.json();
         if (!response.ok) {
           console.error(`Failed to scrape ${source.name}:`, data);
-          return [];
+          return { source: source.name, markdown: '' };
         }
 
         const markdown = data.data?.markdown || data.markdown || '';
         console.log(`Got ${markdown.length} chars from ${source.name}`);
-        return extractCodes(markdown, source.name);
+        return { source: source.name, markdown };
       } catch (err) {
         console.error(`Error scraping ${source.name}:`, err);
-        return [];
+        return { source: source.name, markdown: '' };
       }
     });
 
-    const results = await Promise.all(scrapePromises);
-    for (const codes of results) {
-      allCodes.push(...codes);
+    const scrapedResults = await Promise.all(scrapePromises);
+    const combinedMarkdown = scrapedResults
+      .filter(r => r.markdown.length > 0)
+      .map(r => `=== SOURCE: ${r.source} ===\n${r.markdown}`)
+      .join('\n\n');
+
+    if (!combinedMarkdown) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'No content scraped from any source' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Deduplicate by code string
+    // Use AI to extract codes accurately
+    const today = new Date().toISOString().split('T')[0];
+    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${lovableApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          {
+            role: 'system',
+            content: `You extract Pokemon GO promo codes from website content. Today's date is ${today}. Return ONLY a JSON array of objects with: code (string), reward (string, brief description of what you get), active (boolean - true only if the code is currently working and not expired as of today), source (string - which source website it came from). Include BOTH active and expired/old codes you find - mark expired ones with active: false. Be strict: only include actual promo codes (alphanumeric strings that can be redeemed in Pokemon GO). Do NOT include: page navigation text, website names, random words, user comments, or anything that is clearly not a real Pokemon GO promo code. Return raw JSON array only, no markdown fences.`
+          },
+          {
+            role: 'user',
+            content: `Extract all Pokemon GO promo codes from this scraped content:\n\n${combinedMarkdown.substring(0, 15000)}`
+          }
+        ],
+        temperature: 0.1,
+      }),
+    });
+
+    if (!aiResponse.ok) {
+      console.error('AI extraction failed:', await aiResponse.text());
+      return new Response(
+        JSON.stringify({ success: false, error: 'AI extraction failed' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const aiData = await aiResponse.json();
+    const content = aiData.choices?.[0]?.message?.content || '';
+    console.log('AI response:', content.substring(0, 500));
+
+    let extractedCodes: { code: string; reward: string; active: boolean; source: string }[] = [];
+    try {
+      // Strip markdown code fences if present
+      const cleaned = content.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+      extractedCodes = JSON.parse(cleaned);
+    } catch (e) {
+      console.error('Failed to parse AI response:', e);
+      return new Response(
+        JSON.stringify({ success: false, error: 'Failed to parse AI response' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Deduplicate
     const seen = new Set<string>();
-    const uniqueCodes = allCodes.filter((c) => {
+    const uniqueCodes = extractedCodes.filter((c) => {
       const key = c.code.toUpperCase();
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
     });
 
-    console.log(`Found ${uniqueCodes.length} unique codes from scraping`);
+    console.log(`AI extracted ${uniqueCodes.length} unique codes (${uniqueCodes.filter(c => c.active).length} active)`);
 
     // Persist to database
-    if (uniqueCodes.length > 0) {
-      for (const c of uniqueCodes) {
-        const { error } = await supabase.from('promo_codes').upsert(
-          {
-            code: c.code,
-            reward: c.reward,
-            source: c.source,
-            active: c.active,
-            expires: c.active ? 'Active' : 'Expired',
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: 'code' }
-        );
-        if (error) console.error(`Failed to upsert code ${c.code}:`, error);
-      }
+    for (const c of uniqueCodes) {
+      const { error } = await supabase.from('promo_codes').upsert(
+        {
+          code: c.code,
+          reward: c.reward,
+          source: c.source,
+          active: c.active,
+          expires: c.active ? 'Active' : 'Expired',
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'code' }
+      );
+      if (error) console.error(`Failed to upsert code ${c.code}:`, error);
     }
 
-    // Mark codes as expired if:
-    // 1. Scraped sources explicitly say expired
-    // 2. Code was previously active but NOT found in ANY scraped source anymore (removed = likely expired)
-    const { data: existingCodes } = await supabase.from('promo_codes').select('code, active');
-    if (existingCodes) {
+    // Mark existing DB codes as expired if not found as active in scrape
+    if (uniqueCodes.length > 0) {
+      const { data: existingCodes } = await supabase.from('promo_codes').select('code, active');
       const scrapedActiveSet = new Set(uniqueCodes.filter(c => c.active).map(c => c.code.toUpperCase()));
-      const scrapedExpiredSet = new Set(uniqueCodes.filter(c => !c.active).map(c => c.code.toUpperCase()));
-      const allScrapedSet = new Set(uniqueCodes.map(c => c.code.toUpperCase()));
 
-      for (const existing of existingCodes) {
-        const upperCode = existing.code.toUpperCase();
-        // If found as expired OR no longer listed on any source → mark expired
-        if (existing.active && (scrapedExpiredSet.has(upperCode) || !allScrapedSet.has(upperCode))) {
-          // Only auto-expire if we actually got results from scraping (avoid marking all expired on scrape failure)
-          if (uniqueCodes.length > 0) {
+      if (existingCodes) {
+        for (const existing of existingCodes) {
+          if (existing.active && !scrapedActiveSet.has(existing.code.toUpperCase())) {
             await supabase.from('promo_codes').update({
               active: false,
               expires: 'Expired',
               updated_at: new Date().toISOString(),
             }).eq('code', existing.code);
-            console.log(`Marked ${existing.code} as expired (not found in active sources)`);
+            console.log(`Marked ${existing.code} as expired`);
           }
         }
       }
     }
 
-    const responseBody = JSON.stringify({ success: true, codesFound: uniqueCodes.length, scrapedAt: new Date().toISOString() });
-
-    return new Response(responseBody, {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ success: true, codesFound: uniqueCodes.length, activeCount: uniqueCodes.filter(c => c.active).length, scrapedAt: new Date().toISOString() }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   } catch (error) {
     console.error('Error in scrape-promo-codes:', error);
     return new Response(
-      JSON.stringify({ success: false, error: 'An internal error occurred. Please try again later.' }),
+      JSON.stringify({ success: false, error: 'An internal error occurred.' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
-
-function extractCodes(markdown: string, source: string): { code: string; reward: string; source: string; active: boolean }[] {
-  const codes: { code: string; reward: string; source: string; active: boolean }[] = [];
-
-  // Strategy 1: Parse markdown tables
-  const tableRowRegex = /\|\s*\*{0,2}([A-Za-z0-9]{6,30})\*{0,2}\s*\|\s*(.+?)\s*\|\s*(.+?)\s*\|/g;
-  let match;
-  while ((match = tableRowRegex.exec(markdown)) !== null) {
-    const code = match[1].trim();
-    const reward = match[2].replace(/\*{1,2}/g, '').trim();
-    const expiryInfo = match[3].replace(/\*{1,2}/g, '').trim();
-    if (/^(code|---)/i.test(code)) continue;
-    if (code.length < 6) continue;
-    const isExpired = checkIfExpired(expiryInfo);
-    codes.push({ code, reward, source, active: !isExpired });
-  }
-
-  // Strategy 2: Inline code blocks with context (e.g. "Promo Code: `CODE`" or "**`CODE`**")
-  const inlineCodeRegex = /(?:promo\s*code|code)[:\s]*[`*]*([A-Z0-9]{8,30})[`*]*/gi;
-  const existingCodes = new Set(codes.map(c => c.code.toUpperCase()));
-  while ((match = inlineCodeRegex.exec(markdown)) !== null) {
-    const code = match[1].trim();
-    if (existingCodes.has(code.toUpperCase())) continue;
-    existingCodes.add(code.toUpperCase());
-
-    // Get surrounding context for reward
-    const start = Math.max(0, match.index - 200);
-    const end = Math.min(markdown.length, match.index + 200);
-    const context = markdown.substring(start, end);
-    const isExpired = checkIfExpired(context);
-
-    let reward = 'Promo reward';
-    const rewardMatch = context.match(/(?:get|receive|gives?|provides?|reward)[:\s]+([^.!\n|`]{5,80})/i);
-    if (rewardMatch) reward = rewardMatch[1].replace(/\*{1,2}/g, '').trim();
-
-    codes.push({ code, reward, source, active: !isExpired });
-  }
-
-  // Strategy 3: Standalone all-caps codes
-  const lines = markdown.split('\n');
-  let inExpiredSection = false;
-  const codePattern = /\b([A-Z0-9]{8,30})\b/g;
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    if (/#{1,3}\s*.*(expired|old|past|previous|invalid)/i.test(line)) inExpiredSection = true;
-    if (/#{1,3}\s*.*(active|current|working|new|available)/i.test(line)) inExpiredSection = false;
-
-    const matches = line.match(codePattern);
-    if (!matches) continue;
-
-    for (const code of matches) {
-      if (existingCodes.has(code.toUpperCase())) continue;
-      if (code.length < 8 || code.length > 25) continue;
-      if (/^[0-9]+$/.test(code)) continue;
-      if (/^[A-Z]+$/.test(code) && code.length < 10) continue;
-      if (/^(UPDATED|POKEMON|MARCH|APRIL|FEBRUARY|JANUARY|IMAGE|TABLE|GUIDE|NIANTIC|DEXERTO)/i.test(code)) continue;
-
-      const context = lines.slice(Math.max(0, i - 2), i + 3).join(' ');
-      const isExpired = inExpiredSection || checkIfExpired(context);
-
-      let reward = 'Promo reward';
-      const rewardMatch = context.match(/(?:reward|get|receive|claim|redeem|gives?|provides?)[:\s]+([^.!\n|]{5,80})/i);
-      if (rewardMatch) reward = rewardMatch[1].replace(/\*{1,2}/g, '').trim();
-      else {
-        const cleanLine = line.replace(code, '').replace(/[|*`#\-]/g, '').trim();
-        if (cleanLine.length > 5 && cleanLine.length < 100) reward = cleanLine;
-      }
-
-      existingCodes.add(code.toUpperCase());
-      codes.push({ code, reward, source, active: !isExpired });
-    }
-  }
-
-  return codes;
-}
-
-function checkIfExpired(context: string): boolean {
-  if (/expired|inactive|no longer|invalid|has ended|not working/i.test(context)) return true;
-  const dateMatch = context.match(/(?:expire[sd]?|valid until|ends?|ended)\s+(?:on\s+)?(\w+\.?\s+\d{1,2}(?:,?\s*\d{4})?)/i);
-  if (dateMatch) {
-    try {
-      const parsed = new Date(dateMatch[1]);
-      if (!isNaN(parsed.getTime()) && parsed < new Date()) return true;
-    } catch { /* ignore */ }
-  }
-  return false;
-}
