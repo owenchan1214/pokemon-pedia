@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Copy, Check, Gift, AlertTriangle, ExternalLink } from "lucide-react";
+import { Copy, Check, Gift, AlertTriangle, ExternalLink, Clock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
