@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Copy, Check, Gift, AlertTriangle, ExternalLink } from "lucide-react";
+import { Copy, Check, Gift, AlertTriangle, ExternalLink, Clock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
@@ -17,6 +17,7 @@ const CodesSection = () => {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [codes, setCodes] = useState<PromoCode[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
   useEffect(() => {
     loadCodes();
@@ -34,6 +35,11 @@ const CodesSection = () => {
       if (error) throw error;
 
       if (data && data.length > 0) {
+        // Find the most recent updated_at
+        const mostRecent = data.reduce((latest: string, c: any) => 
+          c.updated_at > latest ? c.updated_at : latest, data[0].updated_at);
+        setLastUpdated(mostRecent);
+
         setCodes(data.map((c: any) => ({
           code: c.code,
           reward: c.reward || 'Promo reward',
@@ -69,6 +75,12 @@ const CodesSection = () => {
         >
           <h2 className="text-3xl md:text-4xl font-display text-gradient-gold mb-2">{t("codes.title")}</h2>
           <p className="text-muted-foreground font-body">{t("codes.subtitle")} · {t("codes.auto_updated")}</p>
+          {lastUpdated && (
+            <p className="text-xs text-muted-foreground/70 font-body mt-1 flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              {t("codes.last_updated")}: {new Date(lastUpdated).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+            </p>
+          )}
         </motion.div>
 
         {isLoading && (

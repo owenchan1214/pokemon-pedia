@@ -97,20 +97,28 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Also mark codes as expired if scraped sources now say so
+    // Mark codes as expired if:
+    // 1. Scraped sources explicitly say expired
+    // 2. Code was previously active but NOT found in ANY scraped source anymore (removed = likely expired)
     const { data: existingCodes } = await supabase.from('promo_codes').select('code, active');
     if (existingCodes) {
       const scrapedActiveSet = new Set(uniqueCodes.filter(c => c.active).map(c => c.code.toUpperCase()));
       const scrapedExpiredSet = new Set(uniqueCodes.filter(c => !c.active).map(c => c.code.toUpperCase()));
+      const allScrapedSet = new Set(uniqueCodes.map(c => c.code.toUpperCase()));
 
       for (const existing of existingCodes) {
-        // If a code was found as expired in scrape, mark it expired
-        if (existing.active && scrapedExpiredSet.has(existing.code.toUpperCase())) {
-          await supabase.from('promo_codes').update({
-            active: false,
-            expires: 'Expired',
-            updated_at: new Date().toISOString(),
-          }).eq('code', existing.code);
+        const upperCode = existing.code.toUpperCase();
+        // If found as expired OR no longer listed on any source → mark expired
+        if (existing.active && (scrapedExpiredSet.has(upperCode) || !allScrapedSet.has(upperCode))) {
+          // Only auto-expire if we actually got results from scraping (avoid marking all expired on scrape failure)
+          if (uniqueCodes.length > 0) {
+            await supabase.from('promo_codes').update({
+              active: false,
+              expires: 'Expired',
+              updated_at: new Date().toISOString(),
+            }).eq('code', existing.code);
+            console.log(`Marked ${existing.code} as expired (not found in active sources)`);
+          }
         }
       }
     }

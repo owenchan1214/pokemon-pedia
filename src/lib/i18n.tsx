@@ -45,6 +45,7 @@ const translations: Record<Language, Record<string, string>> = {
     "codes.last_scan": "Last scan",
     "codes.auto_updated": "Auto-updated every 2 days",
     "codes.loading": "Loading codes...",
+    "codes.last_updated": "Last updated",
   },
   es: {
     "nav.events": "Eventos",
@@ -80,6 +81,7 @@ const translations: Record<Language, Record<string, string>> = {
     "codes.last_scan": "Último escaneo",
     "codes.auto_updated": "Actualizado automáticamente cada 2 días",
     "codes.loading": "Cargando códigos...",
+    "codes.last_updated": "Última actualización",
   },
   fr: {
     "nav.events": "Événements",
@@ -115,6 +117,7 @@ const translations: Record<Language, Record<string, string>> = {
     "codes.last_scan": "Dernier scan",
     "codes.auto_updated": "Mis à jour automatiquement tous les 2 jours",
     "codes.loading": "Chargement des codes...",
+    "codes.last_updated": "Dernière mise à jour",
   },
   de: {
     "nav.events": "Events",
@@ -150,6 +153,7 @@ const translations: Record<Language, Record<string, string>> = {
     "codes.last_scan": "Letzter Scan",
     "codes.auto_updated": "Alle 2 Tage automatisch aktualisiert",
     "codes.loading": "Codes werden geladen...",
+    "codes.last_updated": "Zuletzt aktualisiert",
   },
   ja: {
     "nav.events": "イベント",
@@ -185,6 +189,7 @@ const translations: Record<Language, Record<string, string>> = {
     "codes.last_scan": "最終スキャン",
     "codes.auto_updated": "2日ごとに自動更新",
     "codes.loading": "コードを読み込み中...",
+    "codes.last_updated": "最終更新",
   },
 };
 
